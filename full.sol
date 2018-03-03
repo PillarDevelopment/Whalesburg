@@ -178,7 +178,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     event Finalized();
 
     modifier isUnderHardCap() {
-        require(beneficiary.balance <= hardCapMainISale);
+        require(weisRaised <= hardCap);
         _;
     }
 
@@ -191,7 +191,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     function finalize() onlyOwner public {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
-        require(block.number > EndIcoBlock || weisRaised > hardCap); // только тут поменять на блоки с времени
+        require(block.number > endIcoBlock || weisRaised > hardCap); // только тут поменять на блоки с времени
 
         //finalization();
         Finalized();
