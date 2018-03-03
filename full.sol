@@ -232,17 +232,26 @@ contract WhalesburgCrowdsale is TokenERC20 {
         distribute = true;
     }
 
+    function sell(address _investor, uint256 amount) internal {
+        uint256 _amount = amount.mul(DEC).div(buyPrice);
+        require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
+        avaliableSupply -= _amount;
+        _transfer(this, _investor, _amount);
+    }
+
 
     function () isUnderHardCap public payable {
-        require(block > startIcoBlock && block < endIcoBlock);
-        //sell(msg.sender, msg.value);
+        //require(block > startIcoBlock && block < endIcoBlock); - неправильно
         // проверка что отправляемые средства >= 0,01 ethereum
+        sell(msg.sender, msg.value);
         assert(msg.value >= 1 ether / 100);
         //beneficiary.transfer(msg.value); // средства отправляюся на адрес бенефециара
         // добавляем получаные средства в собранное
         weisRaised = weisRaised.add(msg.value);
         // добавляем в адрес инвестора количество инвестированных эфиров
         //balances[msg.sender] = balances[msg.sender].add(msg.value);
+        multisig.transfer(msg.value);
+
     }
 
     function transferFromFrozen() public holdersSupport {
