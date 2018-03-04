@@ -163,7 +163,7 @@ contract ElephantCrowdsale is TokenERC20 {
         if (whitelist[wlCandidate] = true && now > startICO + 300 ) {
             _amount = _amount.add(withDiscount(_amount, 20));
             // all proved 15%
-        } else if (now > startICO + 600 && now < startICO + 1200) { 
+        } else if (now > startICO + 600 && now < startICO + 1200) {
             _amount = _amount.add(withDiscount(_amount, 15));
             // all proved 10%
         } else if (now > startICO + 1200 && now < startICO + 1800) {
