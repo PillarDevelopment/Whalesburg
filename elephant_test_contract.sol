@@ -1,38 +1,33 @@
 
 /*
-(+)       70% на продажу, 20% команде, 10% промоутерам.
-Токены команде и промоутерам холдятся до конца ICO,
-(+)       нераспроданные сжигаются.
+(+)       70% на продажу, 20% команде, 10% промоутерам. Токены команде и промоутерам холдятся до конца ICO,
+нераспроданные сжигаются.
 
-Бонусы по времени:
-1 этап +20% участникам вайтлиста (только для участников вайтлиста,
+Бонусная система:
+Бонусы по времени: 1 этап +20% участникам вайтлиста (только для участников вайтлиста,
 предоставивших эфир-адрес),
-(+)       2 этап +15% любому участнику,
-(+)       3 этап +10%,
-(+)       4 этап +5%,
-(+)       5 этап без бонусов,
+2 этап +15% любому участнику, 3 этап +10%, 4 этап +5%, 5 этап без бонусов,
 
-Бонусы по сумму
-0 - 5к без %,
-5 - 50 5%,
-50 - 100 10%,
-100 - 200 15%,
-от 200 20%.
+Бонусы по сумму 0 - 5к без %, 5 - 50 5%, 50 - 100 10%, 100 - 200 15%, от 200 20%.
 
-Реферальная система:
-3% пригласившему,
-2% приглашенному.
+Реферальная система: 3% пригласившему, 2% приглашенному.
 
-        // записать маппинг
-         */
+*
+
+} */
 pragma solidity ^0.4.18;
 
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
+* @dev Source code hence -
+* https://github.com/PillarDevelopment/Barbarossa-Git/blob/master/contracts/BarbarossaInvestToken.sol
+*
 */
 
 library SafeMath {
-
+    /**
+    * @dev Multiplies two numbers, throws on overflow.
+    */
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {
             return 0;
@@ -53,9 +48,8 @@ library SafeMath {
         assert(b <= a);
         return a - b;
     }
-    /**
-    * @dev Adds two numbers, throws on overflow.
-    */
+
+
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         assert(c >= a);
@@ -83,10 +77,8 @@ contract TokenERC20 is Ownable {
     string public symbol;
     uint256 public decimals = 18;
     uint256 DEC = 10 ** uint256(decimals);
-    address public owner;
-    // all tokens
+    address public owner;  //0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
     uint256 public totalSupply;
-    // tokens for sale
     uint256 public avaliableSupply;  // totalSupply - all reserve
     uint256 public constant buyPrice = 1000 szabo; //0,001 ether
 
@@ -140,9 +132,8 @@ contract TokenERC20 is Ownable {
 contract ElephantCrowdsale is TokenERC20 {
     using SafeMath for uint;
 
-    // address beneficiary 0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
     address public escrow = 0x0cdb839B52404d49417C8Ded6c3E2157A06CdD37;
-    uint public startICO = 1520294399; //Saturday, 03-Mar-18 00:00:01 UTC
+    uint public startICO = 1520172386; //Saturday, 03-Mar-18 00:00:01 UTC
     uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
     // Supply for team and developers
     uint256 constant teamReserve = 20000000; //15 000 000
@@ -157,16 +148,11 @@ contract ElephantCrowdsale is TokenERC20 {
     uint public weisRaised;
     bool public isFinalized = false;
 
-    uint public bonusTimeTokens; // += на кадом вызове + discountDate + discountSum, - вычитает сумарно из AvailableSypply
+    uint public tokens;
     uint public bonusQTokens;
-    // и обнуляет каждый раз
 
     event Finalized();
 
-
-    mapping(address => uint) public whiteListMembers; // положил свой адрес в список
-    mapping(address => uint) public referals; // кто привлечен
-    mapping(address => uint) public referers; // кто привлекает
     //mapping (address => bool) public onChain;
     //address[] public tokenHolders;  // tokenHolders.length - вернет общее количество инвесторов
     //mapping(address => uint) public balances; // храним адрес инвестора и исколь он инвестировал
@@ -176,88 +162,94 @@ contract ElephantCrowdsale is TokenERC20 {
     //mapping(address => uint) public tokenFrozenBounty; // храним адрес Баунти
 
     function ElephantCrowdsale() public TokenERC20(100000000, "Elephant Marketing Test Token", "EMT") {}
-    // бонусы по срокам
-    function discountDate(address _investor, uint256 amount) internal {
-        require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
+
+    function discountDate(address _investor, uint256 amount) public {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
+        tokens = _amount;
 
         // адрес из whileList
         if (now > startICO  && now < startICO + 600) {
-            bonusTimeTokens = withDiscount(_amount, 20);
-            //_amount = _amount.add(bonusTokens);
-
+            discountSum();
+            _amount = _amount.add(withDiscount(_amount, 20));
+            _amount += bonusQTokens;
             // всем 15
-        } else if (now > startICO + 600 && now < startICO + 1200) { // 864000 = 10 days
-            bonusTimeTokens = withDiscount(_amount, 15);
 
+        } else if (now > startICO + 600 && now < startICO + 1200) { // 864000 = 10 days
+            discountSum();
+            _amount = _amount.add(withDiscount(_amount, 15));
+            _amount += bonusQTokens;
             // всем 10
         } else if (now > startICO + 1200 && now < startICO + 1800) {
-            bonusTimeTokens = withDiscount(_amount, 10);
-
+            discountSum();
+            _amount = _amount.add(withDiscount(_amount, 10));
+            _amount += bonusQTokens;
             // всем 5
         } else if (now > startICO + 1800 && now < startICO + 2400) {
-            bonusTimeTokens = withDiscount(_amount, 5);
+            discountSum();
+            _amount = _amount.add(withDiscount(_amount, 5));
+            _amount += bonusQTokens;
         } else { // ничего
-            bonusTimeTokens = withDiscount(_amount, 0);
+            discountSum();
+            _amount = _amount.add(withDiscount(_amount, 0));
+            _amount += bonusQTokens;
         }
-        //_amount = _amount.add(bonusTokens);
-        //require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
-        //avaliableSupply -= _amount;
-        //_transfer(this, _investor, _amount);
-    }
-
-    function discountSum(address _investor, uint256 amount) internal {
-        uint256 _amount = amount.mul(DEC).div(buyPrice);
         require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
-
-        // от 200 000 - 20%
-        if (_amount > 200000) {
-            bonusQTokens = withDiscount(_amount, 20);
-
-            // 100 - 200 15%,
-        } else if (_amount > 100000 && _amount < 200000) {
-            bonusQTokens = withDiscount(_amount, 15);
-
-            // 50 - 100 10%,
-        } else if (_amount > 50000 && _amount < 100000) {
-            bonusQTokens = withDiscount(_amount, 10);
-
-            // 5 - 50 5%,
-        } else if (_amount > 5000 && _amount < 50000) {
-            bonusQTokens = withDiscount(_amount, 5);
-        } else { // ничего
-            bonusQTokens = withDiscount(_amount, 0);
-        }
-        //require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
-        _amount = _amount+bonusQTokens+bonusTimeTokens;
         avaliableSupply -= _amount;
         _transfer(this, _investor, _amount);
-        bonusQTokens = 0;
-        bonusTimeTokens = 0;
+        bonusQTokens =0;
     }
-
     function withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256) {
         return ((_amount * _percent) / 100);
     }
+    //
+    function discountSum() public {
+        //uint256 _amount = amount.mul(DEC).div(buyPrice);
+        //require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
+        // от 200 000 - 20%
+        if (tokens > 200000) {
+            bonusQTokens = withDiscount(tokens, 20);
+
+            // 100 - 200 15%,
+        } else if (tokens > 100000 && tokens < 200000) {
+            bonusQTokens = withDiscount(tokens, 15);
+
+            // 50 - 100 10%,
+        } else if (tokens > 50000 && tokens < 100000) {
+            bonusQTokens = withDiscount(tokens, 10);
+
+            // 5 - 50 5%,
+        } else if (tokens > 5000 && tokens < 50000) {
+            bonusQTokens = withDiscount(tokens, 5);
+        } else { // ничего
+            bonusQTokens = withDiscount(tokens, 0);
+        }
+        //require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
+        // _amount = _amount+bonusQTokens+bonusTimeTokens;
+        //avaliableSupply -= _amount;
+        //_transfer(this, _investor, _amount);
+        //bonusQTokens = 0;
+        //bonusTimeTokens = 0;
+    }
+
+
 
     // функция для отправки эфира с контракта
     function withdrawEthFromContract(address _to) public onlyOwner
     {
-        require(now > endICO); // проверка когда можно вывести эфир
+        //require(now > endICO); // проверка когда можно вывести эфир
         _to.transfer(weisRaised);
     }
-
-    // делать переменную донус токен
     // функция payable для отправки эфира на адрес
     function ()  public payable {
         require(now > startICO && now < endICO);
-        assert(msg.value >= 1 ether / 1000);
         discountDate(msg.sender, msg.value);
-        discountSum(msg.sender, msg.value);
+        // проверка что отправляемые средства >= 0,001 ethereum
+        assert(msg.value >= 1 ether / 1000);
+        //beneficiary.transfer(msg.value); // средства отправляюся на адрес бенефециара
+        // добавляем получаные средства в собранное
         weisRaised = weisRaised.add(msg.value);
         // добавляем в адрес инвестора количество инвестированных эфиров
         //balances[msg.sender] = balances[msg.sender].add(msg.value);
-
     }
 
     // функция возврата средств инвесторам при недостижении SoftCapPreICO
