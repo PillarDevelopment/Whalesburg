@@ -13,7 +13,45 @@
 Реферальная система: 3% пригласившему, 2% приглашенному.
 
 *
+pragma solidity ^0.4.19;
 
+    uint public weisRaised;
+
+    uint public startICO = 1520035201; //Saturday, 03-Mar-18 00:00:01 UTC
+    uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
+
+    address team = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // account 4
+    address promotion = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // account 3
+    address escrow = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // account 2
+
+    bool distribute = false;
+
+    function distributionTokens() public onlyOwner {
+        require(!distribute);
+        // отправили средства команде
+        _transfer(this, escrow, 30000000*DEC);
+
+        // записать маппинги
+
+
+    function ()  public payable {
+        require(now > startICO && now < endICO);
+        sell(msg.sender, msg.value);
+        weisRaised = weisRaised.add(msg.value);
+        //balances[msg.sender] = balances[msg.sender].add(msg.value);
+        // средства на контракте до окончания ICO
+    }
+
+    function withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256) {
+        return ((_amount * _percent) / 100);
+    }
+
+    function transferEthFromContract(address _to, uint256 amount) public onlyOwner
+    {
+        // проверка что ICO закончено
+        amount = amount * DEC;
+        _to.transfer(amount);
+    }
 } */
 pragma solidity ^0.4.18;
 
@@ -48,8 +86,9 @@ library SafeMath {
         assert(b <= a);
         return a - b;
     }
-
-
+    /**
+    * @dev Adds two numbers, throws on overflow.
+    */
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         assert(c >= a);
@@ -78,7 +117,9 @@ contract TokenERC20 is Ownable {
     uint256 public decimals = 18;
     uint256 DEC = 10 ** uint256(decimals);
     address public owner;  //0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
+    // all tokens
     uint256 public totalSupply;
+    // tokens for sale
     uint256 public avaliableSupply;  // totalSupply - all reserve
     uint256 public constant buyPrice = 1000 szabo; //0,001 ether
 
@@ -132,6 +173,7 @@ contract TokenERC20 is Ownable {
 contract ElephantCrowdsale is TokenERC20 {
     using SafeMath for uint;
 
+    // address beneficiary 0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
     address public escrow = 0x0cdb839B52404d49417C8Ded6c3E2157A06CdD37;
     uint public startICO = 1520172386; //Saturday, 03-Mar-18 00:00:01 UTC
     uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
@@ -231,41 +273,15 @@ contract ElephantCrowdsale is TokenERC20 {
         //bonusTimeTokens = 0;
     }
 
-
-
-    // функция для отправки эфира с контракта
-    function withdrawEthFromContract(address _to) public onlyOwner
-    {
-        //require(now > endICO); // проверка когда можно вывести эфир
-        _to.transfer(weisRaised);
-    }
-    // функция payable для отправки эфира на адрес
     function ()  public payable {
         require(now > startICO && now < endICO);
         discountDate(msg.sender, msg.value);
-        // проверка что отправляемые средства >= 0,001 ethereum
         assert(msg.value >= 1 ether / 1000);
-        //beneficiary.transfer(msg.value); // средства отправляюся на адрес бенефециара
         // добавляем получаные средства в собранное
         weisRaised = weisRaised.add(msg.value);
         // добавляем в адрес инвестора количество инвестированных эфиров
         //balances[msg.sender] = balances[msg.sender].add(msg.value);
-    }
-
-    // функция возврата средств инвесторам при недостижении SoftCapPreICO
-
-    function finalize() onlyOwner public {
-        require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
-        require(now > endICO);
-
-        finalization();
-        Finalized();
-
-        isFinalized = true;
-        Burn(msg.sender, avaliableSupply);
-    }
-
-    function finalization() internal pure {
+        escrow.transfer(msg.value);
     }
 
     function distributionTokens() public onlyOwner {
