@@ -146,6 +146,7 @@ contract ElephantCrowdsale is TokenERC20 {
     // Supply for advisers, consultants and other
     uint256 constant promoReserve = 10000000; //6 000 000
 
+    mapping(address => uint) public whiteList; // храним адрес резервного фонда
 
     address team = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; //  !!!! TEST ADDRESS
     address promo = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; //  !!!! TEST ADDRESS//
@@ -155,6 +156,11 @@ contract ElephantCrowdsale is TokenERC20 {
     bool public isFinalized = false;
 
     event Finalized();
+
+    modifier holdersSupport() {
+        require(msg.sender == team || msg.sender == promo );
+        _;
+    }
 
     function ElephantCrowdsale() public TokenERC20(100000000, "Elephant Marketing Test Token", "EMT") {}
 
@@ -222,6 +228,28 @@ contract ElephantCrowdsale is TokenERC20 {
         _transfer(this, escrow, 30000000*DEC); // frozen all
         avaliableSupply -= 30000000*DEC;
         distribute = true;
+    }
+
+    function tokenTransferFromHolding() public  holdersSupport {
+        //require(!transferFrozen);
+        //require(now > endICO);
+
+        if (msg.sender == team) {
+            //require(tokenFrozenTeam[team] == 20000000*DEC);  // не может быть меньше так как даже если они выведут токены - на меппинг это не отразится
+            //require(tokenFrozenReserve[reserve] == 7500000*DEC;);
+            _transfer(escrow, team, 20000000*DEC);
+            balanceOf[escrow] = balanceOf[escrow].sub(20000000*DEC); // списали с бенефициара
+            //tokenFrozenTeam[team] = 0; // списали с мепинга и сделали его == 0 чтобы второй раз не вывели
+        }
+
+        // !!! team - 7 500 000 после 1.1.2020
+        else if (msg.sender == promo) { // 1577836801 - 01/01/2020 @ 12:00am (UTC)
+            //require(tokenFrozenPromo[promo] == 10000000*DEC);  // не может быть меньше так как даже если они выведут токены - на меппинг это не отразится
+            //tokenFrozenTeam[team] == 0;
+            _transfer(escrow, promo, 10000000*DEC); // перевели еще токены
+            balanceOf[escrow] = balanceOf[escrow].sub(10000000*DEC); // списали с бенефициара
+            //tokenFrozenPromo[promo] = 0; // списали с мепинга и сделали его == 0 чтобы второй раз не вывели
+        }
     }
 }
 /*
