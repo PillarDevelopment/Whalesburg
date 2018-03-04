@@ -1,3 +1,4 @@
+
 /*
 (+)       70% на продажу, 20% команде, 10% промоутерам. Токены команде и промоутерам холдятся до конца ICO,
 нераспроданные сжигаются.
@@ -11,16 +12,60 @@
 
 Реферальная система: 3% пригласившему, 2% приглашенному.
 
-*/
+*
 pragma solidity ^0.4.19;
+
+    uint public weisRaised;
+
+    uint public startICO = 1520035201; //Saturday, 03-Mar-18 00:00:01 UTC
+    uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
+
+    address team = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // account 4
+    address promotion = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // account 3
+    address escrow = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // account 2
+
+    bool distribute = false;
+
+    function distributionTokens() public onlyOwner {
+        require(!distribute);
+        // отправили средства команде
+        _transfer(this, escrow, 30000000*DEC);
+
+        // записать маппинги
+
+
+    function ()  public payable {
+        require(now > startICO && now < endICO);
+        sell(msg.sender, msg.value);
+        weisRaised = weisRaised.add(msg.value);
+        //balances[msg.sender] = balances[msg.sender].add(msg.value);
+        // средства на контракте до окончания ICO
+    }
+
+    function withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256) {
+        return ((_amount * _percent) / 100);
+    }
+
+    function transferEthFromContract(address _to, uint256 amount) public onlyOwner
+    {
+        // проверка что ICO закончено
+        amount = amount * DEC;
+        _to.transfer(amount);
+    }
+} */
+pragma solidity ^0.4.18;
 
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
 * @dev Source code hence -
+* https://github.com/PillarDevelopment/Barbarossa-Git/blob/master/contracts/BarbarossaInvestToken.sol
+*
 */
 
 library SafeMath {
-
+    /**
+    * @dev Multiplies two numbers, throws on overflow.
+    */
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {
             return 0;
@@ -31,7 +76,9 @@ library SafeMath {
     }
 
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        // assert(b > 0); // Solidity automatically throws when dividing by 0
         uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return c;
     }
 
@@ -39,7 +86,9 @@ library SafeMath {
         assert(b <= a);
         return a - b;
     }
-
+    /**
+    * @dev Adds two numbers, throws on overflow.
+    */
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         assert(c >= a);
@@ -49,10 +98,7 @@ library SafeMath {
 
 contract Ownable {
     address public owner;
-    /**
-     * @dev The Ownable constructor sets the original `owner` of the contract to the sender
-     * account.
-     */
+
     function Ownable() public {
         owner = msg.sender;
     }
@@ -68,7 +114,7 @@ contract TokenERC20 is Ownable {
 
     string public name;
     string public symbol;
-    uint256 public decimals = 18;
+    uint256 public decimals = 8;
     uint256 DEC = 10 ** uint256(decimals);
     address public owner;  //0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
     // all tokens
@@ -120,95 +166,115 @@ contract TokenERC20 is Ownable {
         return true;
     }
 }
-
+/*********************************************************************************************************************
+----------------------------------------------------------------------------------------------------------------------
+* @dev YodseCrowdsale contract
+*/
 contract ElephantCrowdsale is TokenERC20 {
     using SafeMath for uint;
 
-    function ElephantCrowdsale() public TokenERC20(100000000, "Elephant Marketing Test Token", "EMT") {}
-
-    //uint public teamToken = 20000000;
-    //uint public promoToken = 10000000;
-    uint public weisRaised;
-
+    // address beneficiary 0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
+    address public escrow = 0x0cdb839B52404d49417C8Ded6c3E2157A06CdD37;
     uint public startICO = 1520035201; //Saturday, 03-Mar-18 00:00:01 UTC
     uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
+    // Supply for team and developers
+    uint256 constant teamReserve = 20000000; //15 000 000
+    // Supply for advisers, consultants and other
+    uint256 constant promoReserve = 10000000; //6 000 000
 
-    address team = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // account 4
-    address promotion = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // account 3
-    address escrow = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // account 2
+
+    address team = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; //  !!!! TEST ADDRESS
+    address promo = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; //  !!!! TEST ADDRESS//
 
     bool distribute = false;
+    uint public weisRaised;
+    bool public isFinalized = false;
 
-    function distributionTokens() public onlyOwner {
-        require(!distribute);
+    event Finalized();
 
-        // отправили средства команде
-        _transfer(this, escrow, 30000000*DEC);
+    //mapping (address => bool) public onChain;
+    //address[] public tokenHolders;  // tokenHolders.length - вернет общее количество инвесторов
+    //mapping(address => uint) public balances; // храним адрес инвестора и исколь он инвестировал
+    //mapping(address => uint) public tokenFrozenTeam; // храним адрес разработчиков
+    //mapping(address => uint) public tokenFrozenReserve; // храним адрес резервного фонда
+    //mapping(address => uint) public tokenFrozenConsult; // храним адрес Консультантов
+    //mapping(address => uint) public tokenFrozenBounty; // храним адрес Баунти
 
-        // записать маппинги
+    function ElephantCrowdsale() public TokenERC20(100000000, "Elephant Marketing Test Token", "EMT") {}
 
-        // founders(10 000 000) + bounthy(3 500 000) + developers(20 500 000) + InvestorsPreISO(10 000 000)
-        //_transfer(this, beneficiary, (foundersReserve+developmentReserve+bounty+preICOTokens)*DEC); // frozen all
-        //_transfer(this, team, 7500000*DEC); // immediately Team 1/2
-        //tokenFrozenTeam[team] = tokenFrozenTeam[team].add(7500000*DEC);
-        //tokenFrozenTeam[team] += 7500000*DEC; // кладем в меппинг первые токены
-        //_transfer(this, consult, 2000000*DEC); // immediately advisers 1/3
-        //tokenFrozenConsult[consult] = tokenFrozenConsult[consult].add(4000000*DEC); // в меппинг кладем 6 000 000 - 4 000 000
-        //_transfer(this, test, 100000*DEC); // immediately testers all
-        //_transfer(this, marketing, 5900000*DEC); // immediately marketing all
-        //tokenFrozenReserve[reserve] = tokenFrozenReserve[reserve].add(10000000*DEC);  // immediately reserve all
-        //tokenFrozenBounty[bounty] = tokenFrozenBounty[bounty].add(3000000*DEC); // immediately bounty all frozen
-
-        avaliableSupply -= 30000000*DEC;
-        distribute = true;
-    }
-
-    function sell(address _investor, uint256 amount) internal {
+    function discountDate(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
-        require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
-        // бонусная система
-        // Бонусная система:
-        // Бонусы по времени: 1 этап +20% участникам вайтлиста (только для участников вайтлиста,
-        // предоставивших эфир-адрес),
-        // 2 этап +15% любому участнику, 3 этап +10%, 4 этап +5%, 5 этап без бонусов,
 
-        //  //  от 200к 20%.
-        if (amount > 200000*DEC) {
+        // адрес из whileList
+        if (now > startICO  && now < startICO + 600) {
             _amount = _amount.add(withDiscount(_amount, 20));
+
+            // всем 15
+        } else if (now > startICO + 600 && now < startICO + 1200) { // 864000 = 10 days
+            _amount = _amount.add(withDiscount(_amount, 15));
+
+            // всем 10
+        } else if (now > startICO + 1200 && now < startICO + 1800) {
+            _amount = _amount.add(withDiscount(_amount, 10));
+
+            // всем 5
+        } else if (now > startICO + 1800 && now < startICO + 2400) {
+            _amount = _amount.add(withDiscount(_amount, 5));
+        } else { // ничего
+            _amount = _amount.add(withDiscount(_amount, 0));
         }
-        /*          // 100 - 200 15%,
-                 else if (now > startIcoDate + 1728000 && now < startIcoDate + 2592000) {
-                    _amount = _amount.add(withDiscount(_amount, 10));
-                    // 50 - 100 10%,
-                } else if (now > startIcoDate + 2592000 && now < startIcoDate + 3456000) {
-                    _amount = _amount.add(withDiscount(_amount, 5));
-                    // token discount 5 - 50 5%
-                } else if (now > startIcoDate + 3456001 && now < endIcoDate) {
-                    _amount = _amount.add(withDiscount(_amount, 5));
-                    // 0 - 5к без %
-                } else {
-                    _amount = _amount.add(withDiscount(_amount, 0));
-                }
-                */
+        require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
         avaliableSupply -= _amount;
         _transfer(this, _investor, _amount);
-    }
-
-    function ()  public payable {
-        sell(msg.sender, msg.value);
-        weisRaised = weisRaised.add(msg.value);
-        //balances[msg.sender] = balances[msg.sender].add(msg.value);
-        // средства на контракте до окончания ICO
     }
 
     function withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256) {
         return ((_amount * _percent) / 100);
     }
 
-    function transferEthFromContract(address _to, uint256 amount) public onlyOwner
+    // функция для отправки эфира с контракта
+    function withdrawEthFromContract(address _to) public onlyOwner
     {
-        // проверка что ICO закончено
-        amount = amount * DEC;
-        _to.transfer(amount);
+        require(now > endICO); // проверка когда можно вывести эфир
+        _to.transfer(weisRaised);
+    }
+    // функция payable для отправки эфира на адрес
+    function ()  public payable {
+        require(now > startICO && now < endICO);
+        discountDate(msg.sender, msg.value);
+        // проверка что отправляемые средства >= 0,001 ethereum
+        assert(msg.value >= 1 ether / 1000);
+        //beneficiary.transfer(msg.value); // средства отправляюся на адрес бенефециара
+        // добавляем получаные средства в собранное
+        weisRaised = weisRaised.add(msg.value);
+        // добавляем в адрес инвестора количество инвестированных эфиров
+        //balances[msg.sender] = balances[msg.sender].add(msg.value);
+    }
+
+    // функция возврата средств инвесторам при недостижении SoftCapPreICO
+
+    function finalize() onlyOwner public {
+        require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
+        require(now > endICO);
+
+        finalization();
+        Finalized();
+
+        isFinalized = true;
+        Burn(msg.sender, avaliableSupply);
+    }
+    /**
+     * @dev Can be overridden to add finalization logic. The overriding function
+     * should call super.finalization() to ensure the chain of finalization is
+     * executed entirely.
+     */
+    function finalization() internal pure {
+    }
+
+    function distributionTokens() public onlyOwner {
+        require(!distribute);
+        _transfer(this, escrow, 30000000*DEC); // frozen all
+        avaliableSupply -= 30000000*DEC;
+        distribute = true;
     }
 }
