@@ -194,13 +194,11 @@ contract ElephantCrowdsale is TokenERC20 {
         return ((_amount * _percent) / 100);
     }
 
-    // функция для отправки эфира с контракта
     function withdrawEthFromContract(address _to) public onlyOwner
     {
         require(now > endICO); // проверка когда можно вывести эфир
         _to.transfer(weisRaised);
     }
-    // функция payable для отправки эфира на адрес
     function ()  public payable {
         require(now > startICO && now < endICO);
         discountDate(msg.sender, msg.value);
@@ -232,23 +230,16 @@ contract ElephantCrowdsale is TokenERC20 {
 
     function tokenTransferFromHolding() public  holdersSupport {
         //require(!transferFrozen);
-        //require(now > endICO);
+        require(now > endICO);
 
         if (msg.sender == team) {
-            //require(tokenFrozenTeam[team] == 20000000*DEC);  // не может быть меньше так как даже если они выведут токены - на меппинг это не отразится
-            //require(tokenFrozenReserve[reserve] == 7500000*DEC;);
             _transfer(escrow, team, 20000000*DEC);
             balanceOf[escrow] = balanceOf[escrow].sub(20000000*DEC); // списали с бенефициара
-            //tokenFrozenTeam[team] = 0; // списали с мепинга и сделали его == 0 чтобы второй раз не вывели
         }
 
-        // !!! team - 7 500 000 после 1.1.2020
         else if (msg.sender == promo) { // 1577836801 - 01/01/2020 @ 12:00am (UTC)
-            //require(tokenFrozenPromo[promo] == 10000000*DEC);  // не может быть меньше так как даже если они выведут токены - на меппинг это не отразится
-            //tokenFrozenTeam[team] == 0;
             _transfer(escrow, promo, 10000000*DEC); // перевели еще токены
             balanceOf[escrow] = balanceOf[escrow].sub(10000000*DEC); // списали с бенефициара
-            //tokenFrozenPromo[promo] = 0; // списали с мепинга и сделали его == 0 чтобы второй раз не вывели
         }
     }
 }
