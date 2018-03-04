@@ -1,4 +1,5 @@
 /*
+@Specification
 (+)       70% на продажу, 20% команде, 10% промоутерам.
 (+)       Токены команде и промоутерам холдятся до конца ICO,
 (+)       нераспроданные сжигаются.
@@ -20,6 +21,7 @@
 } */
 pragma solidity ^0.4.18;
 /*
+* @about Test Example for Elephant Marketing - http://elephant-marketing.com
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
 * @addition https://github.com/PillarDevelopment/PillarLab/blob/master/Contracts/Crowdsale/whitelist.sol
 */
