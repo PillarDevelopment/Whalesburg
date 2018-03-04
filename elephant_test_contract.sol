@@ -173,7 +173,7 @@ contract TokenERC20 is Ownable {
 contract ElephantCrowdsale is TokenERC20 {
     using SafeMath for uint;
 
-    // address beneficiary 0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
+    address beneficiary = 0x0cdb839B52404d49417C8Ded6c3E2157A06CdD37;
     address public escrow = 0x0cdb839B52404d49417C8Ded6c3E2157A06CdD37;
     uint public startICO = 1520172386; //Saturday, 03-Mar-18 00:00:01 UTC
     uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
@@ -243,7 +243,7 @@ contract ElephantCrowdsale is TokenERC20 {
     function withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256) {
         return ((_amount * _percent) / 100);
     }
-    //
+
     function discountSum() public {
         //uint256 _amount = amount.mul(DEC).div(buyPrice);
         //require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
@@ -272,18 +272,15 @@ contract ElephantCrowdsale is TokenERC20 {
         //bonusQTokens = 0;
         //bonusTimeTokens = 0;
     }
-
     function ()  public payable {
         require(now > startICO && now < endICO);
         discountDate(msg.sender, msg.value);
         assert(msg.value >= 1 ether / 1000);
-        // добавляем получаные средства в собранное
         weisRaised = weisRaised.add(msg.value);
         // добавляем в адрес инвестора количество инвестированных эфиров
         //balances[msg.sender] = balances[msg.sender].add(msg.value);
-        escrow.transfer(msg.value);
+        beneficiary.transfer(msg.value);
     }
-
     function distributionTokens() public onlyOwner {
         require(!distribute);
         _transfer(this, escrow, 30000000*DEC); // frozen all
