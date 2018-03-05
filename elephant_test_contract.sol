@@ -126,7 +126,7 @@ contract ElephantCrowdsale is TokenERC20 {
 
     address public multisig = 0xC032D3fCA001b73e8cC3be0B75772329395caA49;  //  !!!! TEST ADDRESS
     address public escrow = 0x0cdb839B52404d49417C8Ded6c3E2157A06CdD37;  //  !!!! TEST ADDRESS
-    uint public startICO = 1520035201; // now
+    uint public startICO = 1520243466; // now
     uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
     // Supply for team and developers
     uint256 constant teamReserve = 20000000; //15 000 000
@@ -276,7 +276,7 @@ contract ElephantCrowdsale is TokenERC20 {
             _amount = withDiscount(_amount, 10);
             _transfer(this, _investor, _amount);
             // 5 - 50 5%,
-        } else if (bonusSum > 5000 && bonusSum < 50000000000000000000) { //5 - 50
+        } else if (bonusSum > 5000000000000000000 && bonusSum < 50000000000000000000) { //5 - 50
             _amount = withDiscount(_amount, 5);
             _transfer(this, _investor, _amount);
         } else { // ничего =  revert
