@@ -140,6 +140,7 @@ contract ElephantCrowdsale is TokenERC20 {
     address team = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; //  !!!! TEST ADDRESS
     address promo = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; //  !!!! TEST ADDRESS//
     address wlCandidate;
+    uint public bonusSum;
 
     bool distribute = false;
     uint public weisRaised;
@@ -186,7 +187,9 @@ contract ElephantCrowdsale is TokenERC20 {
     }*/
     function ()  public payable {
         require(now > startICO && now < endICO);
+        bonusSum = msg.value;
         discountDate(msg.sender, msg.value);
+        discountSum(msg.sender, msg.value);
         assert(msg.value >= 1 ether / 1000);
         weisRaised = weisRaised.add(msg.value);
         multisig.transfer(msg.value);
@@ -225,31 +228,36 @@ contract ElephantCrowdsale is TokenERC20 {
             balanceOf[escrow] = balanceOf[escrow].sub(10000000*DEC);
         }
     }
-}
-/*
-function discountSum(address _investor, uint256 amount) public {
+
+
+
+    function discountSum(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
-        if (msg.value > 200000000000000000000) { // 200 ether
-        _amount = _amount.add(withDiscount(_amount, 20));
-        _transfer(this, _investor, _amount);
-        //bonusQTokens = withDiscount(tokens, 20);
-        // 100 - 200 15%,
-    } else if (tokens > 100000000000000000000 && tokens < 200000000000000000000) { // 100 000 - 200 000
-        _amount = _amount.add(withDiscount(_amount, 15));
-        _transfer(this, _investor, _amount);
-        // 50 - 100 10%,
-    } else if (tokens > 50000000000000000000 && tokens < 100000000000000000000) {
-        _amount = _amount.add(withDiscount(_amount, 10));
-        _transfer(this, _investor, _amount);
-        // 5 - 50 5%,
-    } else if (tokens > 5000 && tokens < 50000000000000000000) {
-        _amount = _amount.add(withDiscount(_amount, 5));
-        _transfer(this, _investor, _amount);
-    } else { // ничего
-        _amount = _amount.add(withDiscount(_amount, 0));
-        _transfer(this, _investor, _amount);
+
+        if (bonusSum > 200000000000000000000) { // 200 ether
+            _amount = withDiscount(_amount, 20);
+            _transfer(this, _investor, _amount);
+            //bonusQTokens = withDiscount(tokens, 20);
+            // 100 - 200 15%,
+        } else if (bonusSum > 100000000000000000000 && bonusSum < 200000000000000000000) { // 100  - 200
+            _amount = withDiscount(_amount, 15);
+            _transfer(this, _investor, _amount);
+            // 50 - 100 10%,
+        } else if (bonusSum > 50000000000000000000 && bonusSum < 100000000000000000000) { //50 - 100
+            _amount = withDiscount(_amount, 10);
+            _transfer(this, _investor, _amount);
+            // 5 - 50 5%,
+        } else if (bonusSum > 5000 && bonusSum < 50000000000000000000) { //5 - 50
+            _amount = withDiscount(_amount, 5);
+            _transfer(this, _investor, _amount);
+        } else { // ничего =  revert
+            _amount = withDiscount(_amount, 0);
+            revert();
+            //_transfer(this, _investor, _amount);
         }
         avaliableSupply -= _amount;
-        _transfer(this, _investor, _amount);
+        //_transfer(this, _investor, _amount);
     }
-*/
+
+
+}
