@@ -180,11 +180,7 @@ contract ElephantCrowdsale is TokenERC20 {
     function withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256) {
         return ((_amount * _percent) / 100);
     }
-    /*function withdrawEthFromContract(address _to) public onlyOwner
-    {
-        require(now > endICO);
-        _to.transfer(weisRaised);
-    }*/
+    
     function ()  public payable {
         require(now > startICO && now < endICO);
         bonusSum = msg.value;
@@ -237,7 +233,6 @@ contract ElephantCrowdsale is TokenERC20 {
         if (bonusSum > 200000000000000000000) { // 200 ether
             _amount = withDiscount(_amount, 20);
             _transfer(this, _investor, _amount);
-            //bonusQTokens = withDiscount(tokens, 20);
             // 100 - 200 15%,
         } else if (bonusSum > 100000000000000000000 && bonusSum < 200000000000000000000) { // 100  - 200
             _amount = withDiscount(_amount, 15);
@@ -253,10 +248,8 @@ contract ElephantCrowdsale is TokenERC20 {
         } else { // ничего =  revert
             _amount = withDiscount(_amount, 0);
             revert();
-            //_transfer(this, _investor, _amount);
         }
         avaliableSupply -= _amount;
-        //_transfer(this, _investor, _amount);
     }
 
 
