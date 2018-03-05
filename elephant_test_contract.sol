@@ -137,15 +137,15 @@ contract ElephantCrowdsale is TokenERC20 {
 
     //mapping(address=>bool) public refererList; // add address referrer
     //mapping(address=>bool) public referer; // add address referrer
-    //address referal;
-    //address referer;
+    address referal;
+    address referer = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E;
 
     address team = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; //  !!!! TEST ADDRESS
     address promo = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; //  !!!! TEST ADDRESS//
     address wlCandidate;
     uint public bonusSum;
-    //uint refererTokens;
-    //uint referalTokens;
+    uint refererTokens;
+    uint referalTokens;
 
     bool distribute = false;
     uint public weisRaised;
@@ -190,35 +190,36 @@ contract ElephantCrowdsale is TokenERC20 {
         require(now > startICO && now < endICO);
         bonusSum = msg.value;
         assert(msg.value >= 1 ether / 1000);
-/*
-if(msg.data.length == 20) {
-            address referer = bytesToAddres(bytes(msg.data));
-            // проверка, чтобы инвестор не начислил бонусы сам себе
-            require(referer != msg.sender);
 
-            uint refererTokens = msg.value.mul(DEC).div(buyPrice);
-            refererTokens = refererTokens.mul(3).div(100);
+        //if(msg.data.length == 20) {
+        referal = msg.sender;
+        referer = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1;
+        //address referer = bytesToAddress(bytes(msg.data));
+        // проверка, чтобы инвестор не начислил бонусы сам себе
+        require(referer != msg.sender);
+
+        refererTokens = msg.value.mul(DEC).div(buyPrice);
+        refererTokens = refererTokens.mul(3).div(100);
         // начисляем рефереру
-            uint referalTokens = msg.value.mul(DEC).div(buyPrice);
-            refererTokens = refererTokens.mul(3).div(100);
+        referalTokens = msg.value.mul(DEC).div(buyPrice);
+        referalTokens = referalTokens.mul(2).div(100);
         // начисляем рефералу
 
-            _transfer(referer, refererTokens);
-            _transfer(referer, referalTokens);
-
-        } else {
-            revert();
-        }
-*/
-
+        transfer(referer, refererTokens);
+        transfer(referal, referalTokens);
+        avaliableSupply -= refererTokens;
+        avaliableSupply -= referalTokens;
+        //} else {
+        //  revert();
+        //}
 
         discountDate(msg.sender, msg.value);
         discountSum(msg.sender, msg.value);
         weisRaised = weisRaised.add(msg.value);
         multisig.transfer(msg.value);
     }
-/*
-function bytesToAddress(bytes source) internal pure returns(address) {
+
+    function bytesToAddress(bytes source) internal pure returns(address) {
         uint result;
         uint mul = 1;
         for(uint i = 20; i > 0; i--) {
@@ -227,7 +228,7 @@ function bytesToAddress(bytes source) internal pure returns(address) {
         }
         return address(result);
     }
-*/
+
     function finalize() onlyOwner public {
         require(!isFinalized);
         require(now > endICO);
