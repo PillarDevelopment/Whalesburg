@@ -18,6 +18,13 @@
 от 200 20%.
 
 Реферальная система: 3% пригласившему, 2% приглашенному.
+
+Идеи по рефакторингу
+- переделать заморозку - токены остаются на контракте, вычитаются из AvailableSupply
+и выводяться по трансферу модификатором после окончания ICO (возможно так даже проще)
+- реферальная система
+- бонусные токены за объем
+- сделать три трансфера токенов - основной, бонусы за время, бонусы за сумму
 } */
 pragma solidity ^0.4.18;
 /*
@@ -35,19 +42,14 @@ library SafeMath {
         assert(c / a == b);
         return c;
     }
-
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        // assert(b > 0); // Solidity automatically throws when dividing by 0
         uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return c;
     }
-
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         assert(b <= a);
         return a - b;
     }
-
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         assert(c >= a);
@@ -57,11 +59,9 @@ library SafeMath {
 
 contract Ownable {
     address public owner;
-
     function Ownable() public {
         owner = msg.sender;
     }
-
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
@@ -70,7 +70,6 @@ contract Ownable {
 
 contract TokenERC20 is Ownable {
     using SafeMath for uint;
-
     string public name;
     string public symbol;
     uint256 public decimals = 8;
@@ -98,7 +97,6 @@ contract TokenERC20 is Ownable {
         symbol = tokenSymbol;                               // Set the symbol for display purposes
         owner = msg.sender;
     }
-
     function _transfer(address _from, address _to, uint256 _value) internal {
         require(_to != 0x0);
         require(balanceOf[_from] >= _value);
@@ -109,11 +107,9 @@ contract TokenERC20 is Ownable {
         Transfer(_from, _to, _value);
         assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
     }
-
     function transfer(address _to, uint256 _value) public {
         _transfer(msg.sender, _to, _value);
     }
-
     function burn(uint256 _value) public onlyOwner returns (bool success) {
         require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough
         balanceOf[msg.sender] -= _value;            // Subtract from the sender
@@ -160,7 +156,6 @@ contract ElephantCrowdsale is TokenERC20 {
 
     function discountDate(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
-
         // address added in whileList
         if (whitelist[wlCandidate] = true && now > startICO + 300 ) {
             _amount = _amount.add(withDiscount(_amount, 20));
@@ -184,12 +179,11 @@ contract ElephantCrowdsale is TokenERC20 {
     function withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256) {
         return ((_amount * _percent) / 100);
     }
-
-    function withdrawEthFromContract(address _to) public onlyOwner
+    /*function withdrawEthFromContract(address _to) public onlyOwner
     {
         require(now > endICO);
         _to.transfer(weisRaised);
-    }
+    }*/
     function ()  public payable {
         require(now > startICO && now < endICO);
         discountDate(msg.sender, msg.value);
@@ -226,9 +220,7 @@ contract ElephantCrowdsale is TokenERC20 {
         if (msg.sender == team) {
             _transfer(escrow, team, 20000000*DEC);
             balanceOf[escrow] = balanceOf[escrow].sub(20000000*DEC);
-        }
-
-        else if (msg.sender == promo) {
+        } else if (msg.sender == promo) {
             _transfer(escrow, promo, 10000000*DEC);
             balanceOf[escrow] = balanceOf[escrow].sub(10000000*DEC);
         }
