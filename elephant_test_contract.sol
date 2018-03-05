@@ -16,14 +16,14 @@
 (+)       50 - 100 10%,
 (+)       100 - 200 15%,
 (+)       от 200 20%.
+(+)       Реферальная система: 3% пригласившему, 2% приглашенному.
 
-Реферальная система: 3% пригласившему, 2% приглашенному.
-
-Идеи по рефакторингу
+@refactoring
 - переделать заморозку - токены остаются на контракте, вычитаются из AvailableSupply
 и выводяться по трансферу модификатором после окончания ICO (возможно так даже проще)
 - сделать три трансфера токенов - основной, бонусы за время, бонусы за сумму
-} */
+*/
+
 pragma solidity ^0.4.18;
 /*
 * @about Test Example for Elephant Marketing - http://elephant-marketing.com
@@ -136,7 +136,6 @@ contract ElephantCrowdsale is TokenERC20 {
     mapping(address=>bool) public whitelist; // add address wlCandidate
 
     //mapping(address=>bool) public refererList; // add address referrer
-    //mapping(address=>bool) public referer; // add address referrer
     address referal;
     address referer = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E;
 
@@ -191,34 +190,31 @@ contract ElephantCrowdsale is TokenERC20 {
         bonusSum = msg.value;
         assert(msg.value >= 1 ether / 1000);
 
-        //if(msg.data.length == 20) {
+        /* if(msg.data.length == 20) {
         referal = msg.sender;
-        referer = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1;
+        //referer = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1;
         //address referer = bytesToAddress(bytes(msg.data));
         // проверка, чтобы инвестор не начислил бонусы сам себе
         require(referer != msg.sender);
-
         refererTokens = msg.value.mul(DEC).div(buyPrice);
         refererTokens = refererTokens.mul(3).div(100);
         // начисляем рефереру
         referalTokens = msg.value.mul(DEC).div(buyPrice);
         referalTokens = referalTokens.mul(2).div(100);
         // начисляем рефералу
-
         transfer(referer, refererTokens);
         transfer(referal, referalTokens);
         avaliableSupply -= refererTokens;
         avaliableSupply -= referalTokens;
-        //} else {
-        //  revert();
-        //}
-
+        } else {
+          revert();
+        } */
         discountDate(msg.sender, msg.value);
         discountSum(msg.sender, msg.value);
         weisRaised = weisRaised.add(msg.value);
         multisig.transfer(msg.value);
     }
-
+    /*
     function bytesToAddress(bytes source) internal pure returns(address) {
         uint result;
         uint mul = 1;
@@ -228,6 +224,8 @@ contract ElephantCrowdsale is TokenERC20 {
         }
         return address(result);
     }
+    */
+
 
     function finalize() onlyOwner public {
         require(!isFinalized);
