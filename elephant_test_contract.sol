@@ -3,27 +3,25 @@
 (+)       70% на продажу, 20% команде, 10% промоутерам.
 (+)       Токены команде и промоутерам холдятся до конца ICO,
 (+)       нераспроданные сжигаются.
-Бонусная система:
+(+)       Бонусная система:
 (+)       Бонусы по времени:
 (+)       1 этап +20% участникам вайтлиста (только для участников вайтлиста,предоставивших эфир-адрес),
 (+)       2 этап +15% любому участнику,
 (+)       3 этап +10%,
 (+)       4 этап +5%,
 (+)       5 этап без бонусов,
-Бонусы по сумму
-0 - 5к без %,
-5 - 50 5%,
-50 - 100 10%,
-100 - 200 15%,
-от 200 20%.
+(+)       Бонусы по сумму
+(+)       0 - 5к без %,
+(+)       5 - 50 5%,
+(+)       50 - 100 10%,
+(+)       100 - 200 15%,
+(+)       от 200 20%.
 
 Реферальная система: 3% пригласившему, 2% приглашенному.
 
 Идеи по рефакторингу
 - переделать заморозку - токены остаются на контракте, вычитаются из AvailableSupply
 и выводяться по трансферу модификатором после окончания ICO (возможно так даже проще)
-- реферальная система
-- бонусные токены за объем
 - сделать три трансфера токенов - основной, бонусы за время, бонусы за сумму
 } */
 pragma solidity ^0.4.18;
@@ -137,10 +135,17 @@ contract ElephantCrowdsale is TokenERC20 {
 
     mapping(address=>bool) public whitelist; // add address wlCandidate
 
+    //mapping(address=>bool) public refererList; // add address referrer
+    //mapping(address=>bool) public referer; // add address referrer
+    //address referal;
+    //address referer;
+
     address team = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; //  !!!! TEST ADDRESS
     address promo = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; //  !!!! TEST ADDRESS//
     address wlCandidate;
     uint public bonusSum;
+    //uint refererTokens;
+    //uint referalTokens;
 
     bool distribute = false;
     uint public weisRaised;
@@ -180,17 +185,49 @@ contract ElephantCrowdsale is TokenERC20 {
     function withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256) {
         return ((_amount * _percent) / 100);
     }
-    
+
     function ()  public payable {
         require(now > startICO && now < endICO);
         bonusSum = msg.value;
+        assert(msg.value >= 1 ether / 1000);
+/*
+if(msg.data.length == 20) {
+            address referer = bytesToAddres(bytes(msg.data));
+            // проверка, чтобы инвестор не начислил бонусы сам себе
+            require(referer != msg.sender);
+
+            uint refererTokens = msg.value.mul(DEC).div(buyPrice);
+            refererTokens = refererTokens.mul(3).div(100);
+        // начисляем рефереру
+            uint referalTokens = msg.value.mul(DEC).div(buyPrice);
+            refererTokens = refererTokens.mul(3).div(100);
+        // начисляем рефералу
+
+            _transfer(referer, refererTokens);
+            _transfer(referer, referalTokens);
+
+        } else {
+            revert();
+        }
+*/
+
+
         discountDate(msg.sender, msg.value);
         discountSum(msg.sender, msg.value);
-        assert(msg.value >= 1 ether / 1000);
         weisRaised = weisRaised.add(msg.value);
         multisig.transfer(msg.value);
     }
-
+/*
+function bytesToAddress(bytes source) internal pure returns(address) {
+        uint result;
+        uint mul = 1;
+        for(uint i = 20; i > 0; i--) {
+            result += uint8(source[i-1])*mul;
+            mul = mul*256;
+        }
+        return address(result);
+    }
+*/
     function finalize() onlyOwner public {
         require(!isFinalized);
         require(now > endICO);
@@ -225,8 +262,6 @@ contract ElephantCrowdsale is TokenERC20 {
         }
     }
 
-
-
     function discountSum(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
 
@@ -251,6 +286,4 @@ contract ElephantCrowdsale is TokenERC20 {
         }
         avaliableSupply -= _amount;
     }
-
-
 }
