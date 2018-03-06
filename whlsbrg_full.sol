@@ -202,7 +202,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     // frozen tokens for Founders
     uint public bountyReserve = 3500000;
     // tokes for bounty program
-    uint public individualCap; // в переменной находится текузая дата для расчета доступных средств
+    uint public individualRoundCap; // в переменной находится текузая дата для расчета доступных средств
     // variable for
     uint public hardCap = 1421640000000000000000;
     // 1421.64 ether
@@ -217,7 +217,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     // храним список WhiteList
     mapping(address => bool) public Wait_List;
     // храним список WaitList
-    mapping(address => uint) public saleLimit;
+    mapping(address => uint) public roundSaleLimit;
 
     event Finalized();
 
@@ -255,13 +255,13 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     function maxDayLimit() internal {
         if(now > startICO && now <  startICO + 7200 ) { //первые 2 часа с начала
-            individualCap = 500000000000000000; //0,5 ETH
+            individualRoundCap = 500000000000000000; //0,5 ETH
         } else if(now >= startICO + 7200 && now < startICO + 14400) { //следующие 2 часа
-            individualCap = 2000000000000000000; // 2 ETH
+            individualRoundCap = 2000000000000000000; // 2 ETH
         } else if(now >= startICO + 14400 && now < startICO + 86400) { // следующие 20 часов
-            individualCap = 10000000000000000000; // 10 ETH
+            individualRoundCap = 10000000000000000000; // 10 ETH
         } else if(now >= startICO + 86400 && now < endICO) { // следующие 6 дней
-            individualCap = 1400000000000000000000; //1400 ETH
+            individualRoundCap = 1400000000000000000000; //1400 ETH
         } else { // далее
             revert();
         }
@@ -271,9 +271,9 @@ contract WhalesburgCrowdsale is TokenERC20 {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
         if(White_List[white_members] == true) {
             maxDayLimit(); //
-            require(_amount <= saleLimit[_investor]); // проверили что кап не достигнут
+            require(_amount <= roundSaleLimit[_investor]); // проверили что кап не достигнут
             _transfer(this, _investor, _amount);
-            saleLimit[_investor] = saleLimit[_investor].sub(_amount); // добавили купленное в mappig инвестора
+            roundSaleLimit[_investor] = roundSaleLimit[_investor].sub(_amount); // добавили купленное в mappig инвестора
             //cap = cap+_amount;
         } else if(Wait_List[wait_memebers] == true) {
             // вызов функции можно ли ему в WhiteList
