@@ -125,7 +125,7 @@ contract TokenERC20 is Ownable {
 
     string public name;
     string public symbol;
-    uint256 public decimals = 8;
+    uint256 public decimals = 18;
     uint256 DEC = 10 ** uint256(decimals);
     address public owner;  //0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
     // all tokens
@@ -180,12 +180,16 @@ contract TokenERC20 is Ownable {
 
 contract WhalesburgCrowdsale is TokenERC20 {
     using SafeMath for uint;
+
     address public multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
     address public escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
     address public bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
     address public earlyInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
     address public developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address public founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
+    address white_members;
+    address wait_memebers;
+
     uint public startIcoBlock = 1520321276; //2755500; // test roopsten - в среднем 6 секунд - 14 400 в сутках
     // start TokenSale block
     uint public endIcoBlock = 1520666876;//2813100; // примерно до 6 марта
@@ -198,24 +202,29 @@ contract WhalesburgCrowdsale is TokenERC20 {
     // frozen tokens for Founders
     uint public bountyReserve = 3500000;
     // tokes for bounty program
+
     uint public maxDayLimetSale; // от номера блокаи
     // variable for
     uint public hardCap = 3800000000000000000000;
     // 3 800 ether
+
     bool public isFinalized = false;
     bool public distribute = false;
+
     uint public weisRaised;
     // collect ethereum
-    mapping(address => uint) public WhiteList;
+
+    mapping(address => bool) public White_List;
     // храним список WhiteList
-    mapping(address => uint) public  WaitList;
+    mapping(address => bool) public  Wait_List;
     // храним список WaitList
+
     event Finalized();
+
     modifier isUnderHardCap() {
         require(weisRaised <= hardCap);
         _;
     }
-
     modifier holdersSupport() { //чьи заморож токены остались (team, consult, reserve, bounty)
         require(msg.sender ==  developers|| msg.sender == founders || msg.sender == owner);
         _;
@@ -259,14 +268,23 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     function sell(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
+        if(White_List[white_members] == true) {
+            _transfer(this, _investor, _amount);
+        } else if(Wait_List[wait_memebers] == true) {
+            // вызов функции можно ли ему в WhiteList
+        } else {
+            revert();
+        }
+
         require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
         avaliableSupply -= _amount;
-        _transfer(this, _investor, _amount);
+        //_transfer(this, _investor, _amount);
     }
 
     function () isUnderHardCap public payable {
         require(now > startIcoBlock && now < endIcoBlock); //- неправильно
         // проверка что отправляемые средства >= 0,01 ethereum
+
         sell(msg.sender, msg.value);
         assert(msg.value >= 1 ether / 100);
         //beneficiary.transfer(msg.value); // средства отправляюся на адрес бенефециара
