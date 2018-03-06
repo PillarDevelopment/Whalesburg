@@ -184,17 +184,17 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address public multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
     address public escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
     address public bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
-    address public earlyInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
+    address public privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
     address public developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address public founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
     address white_members;
     address wait_memebers;
 
-    uint public startIcoBlock = 1520321276; //2755500; // test roopsten - в среднем 6 секунд - 14 400 в сутках
+    uint public startICO = 1520338635; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
-    uint public endIcoBlock = 1520666876;//2813100; // примерно до 6 марта
+    uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
-    uint public preICOTokens = 10000000;  //  вымышленное количество - например 10%
+    uint public privateSaleInvestors = 46200000;  //  вымышленное количество - например 10%
     // tokens for participants preICO
     uint public foundersReserve = 10000000;
     // frozen tokens for Founders
@@ -202,11 +202,10 @@ contract WhalesburgCrowdsale is TokenERC20 {
     // frozen tokens for Founders
     uint public bountyReserve = 3500000;
     // tokes for bounty program
-
-    uint public maxDayLimetSale; // от номера блокаи
+    uint public individualCap; // в переменной находится текузая дата для расчета доступных средств
     // variable for
-    uint public hardCap = 3800000000000000000000;
-    // 3 800 ether
+    uint public hardCap = 1421640000000000000000;
+    // 1421.64 ether
 
     bool public isFinalized = false;
     bool public distribute = false;
@@ -216,8 +215,9 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     mapping(address => bool) public White_List;
     // храним список WhiteList
-    mapping(address => bool) public  Wait_List;
+    mapping(address => bool) public Wait_List;
     // храним список WaitList
+    mapping(address => uint) public saleLimit;
 
     event Finalized();
 
@@ -234,7 +234,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     function finalize() onlyOwner public {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
-        require(block.number > endIcoBlock || weisRaised > hardCap); // только тут поменять на блоки с времени
+        require(now > endICO || weisRaised > hardCap); // только тут поменять на блоки с времени
         //finalization();
         Finalized();
         isFinalized = true;
@@ -246,30 +246,35 @@ contract WhalesburgCrowdsale is TokenERC20 {
         // отправили средства баунти 3,5
         _transfer(this, bounty, bountyReserve*DEC);
         // отправили средства ранних инветосторов 10
-        _transfer(this, earlyInvestors, preICOTokens*DEC);
+        _transfer(this, privateInvestors, privateSaleInvestors*DEC);
         // отправили средства для заморозки (developmentReserve+foundersReserve)
         _transfer(this, escrow, (developmentReserve+foundersReserve)*DEC);
-
-        // записать маппинги
-        // founders(10 000 000) + bounthy(3 500 000) + developers(20 500 000) + InvestorsPreISO(10 000 000)
-        //_transfer(this, beneficiary, (foundersReserve+developmentReserve+bounty+preICOTokens)*DEC); // frozen all
-        //_transfer(this, team, 7500000*DEC); // immediately Team 1/2
-        //tokenFrozenTeam[team] = tokenFrozenTeam[team].add(7500000*DEC);
-        //tokenFrozenTeam[team] += 7500000*DEC; // кладем в меппинг первые токены
-        //_transfer(this, consult, 2000000*DEC); // immediately advisers 1/3
-        //tokenFrozenConsult[consult] = tokenFrozenConsult[consult].add(4000000*DEC); // в меппинг кладем 6 000 000 - 4 000 000
-        //_transfer(this, test, 100000*DEC); // immediately testers all
-        //_transfer(this, marketing, 5900000*DEC); // immediately marketing all
-        //tokenFrozenReserve[reserve] = tokenFrozenReserve[reserve].add(10000000*DEC);  // immediately reserve all
-        //tokenFrozenBounty[bounty] = tokenFrozenBounty[bounty].add(3000000*DEC); // immediately bounty all frozen
-        avaliableSupply -= 44000000*DEC;
+        avaliableSupply -= 80200000*DEC;
         distribute = true;
+    }
+
+    function maxDayLimit() internal {
+        if(now > startICO && now <  startICO + 7200 ) { //первые 2 часа с начала
+            individualCap = 500000000000000000; //0,5 ETH
+        } else if(now >= startICO + 7200 && now < startICO + 14400) { //следующие 2 часа
+            individualCap = 2000000000000000000; // 2 ETH
+        } else if(now >= startICO + 14400 && now < startICO + 86400) { // следующие 20 часов
+            individualCap = 10000000000000000000; // 10 ETH
+        } else if(now >= startICO + 86400 && now < endICO) { // следующие 6 дней
+            individualCap = 1400000000000000000000; //1400 ETH
+        } else { // далее
+            revert();
+        }
     }
 
     function sell(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
         if(White_List[white_members] == true) {
+            maxDayLimit(); //
+            require(_amount <= saleLimit[_investor]); // проверили что кап не достигнут
             _transfer(this, _investor, _amount);
+            saleLimit[_investor] = saleLimit[_investor].sub(_amount); // добавили купленное в mappig инвестора
+            //cap = cap+_amount;
         } else if(Wait_List[wait_memebers] == true) {
             // вызов функции можно ли ему в WhiteList
         } else {
@@ -282,11 +287,9 @@ contract WhalesburgCrowdsale is TokenERC20 {
     }
 
     function () isUnderHardCap public payable {
-        require(now > startIcoBlock && now < endIcoBlock); //- неправильно
-        // проверка что отправляемые средства >= 0,01 ethereum
-
+        require(now > startICO && now < endICO); //- даты ICO
+        assert(msg.value >= 1 ether / 100); // проверка что средства не меньше чем 1 токен
         sell(msg.sender, msg.value);
-        assert(msg.value >= 1 ether / 100);
         //beneficiary.transfer(msg.value); // средства отправляюся на адрес бенефециара
         // добавляем получаные средства в собранное
         weisRaised = weisRaised.add(msg.value);
@@ -296,12 +299,12 @@ contract WhalesburgCrowdsale is TokenERC20 {
     }
 
     function transferFromFrozen(address _investor, uint256 amount) public holdersSupport {
-        require(now > endIcoBlock);
+        require(now > endICO);
         // вывод средств на счет фаундеров
         if(msg.sender == founders && now > 1552608001) { // 03/15/2019 @ 12:00am (UTC)
             _transfer(escrow, founders, foundersReserve*DEC);
             // вывод средств на счет девелоперов
-        } else if(msg.sender == developers && now > endIcoBlock) { //нет параметров проерки, пускай будет конец ICO
+        } else if(msg.sender == developers && now > endICO) { //нет параметров проерки, пускай будет конец ICO
             _transfer(escrow, developers, developmentReserve*DEC);
             // владелец контракта распределяет средства
         } else if(msg.sender == owner) {
@@ -309,6 +312,3 @@ contract WhalesburgCrowdsale is TokenERC20 {
         }
     }
 }
-
-
-
