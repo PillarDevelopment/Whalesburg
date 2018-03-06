@@ -13,23 +13,21 @@ WeiRaised
 токенов доступных для продажи
 проданных токенов
 
-нет софт капа
-скидок нет
+(+)     нет софт капа
+(+)     скидок нет
 
 - проданные токены на пресейл
 
-- ефир отправляется на мультисиг
+(+)     - ефир отправляется на мультисиг
 
-- убрать оракул - сколько стоит доллар - была првязка к доллару
+(+)     - убрать оракул - сколько стоит доллар - была првязка к доллару
 
 лучше сделать несколькими контрактами из за WhiteList и WaitList
-
 
 сроки - 8-9 марта - на аудит
 тестирование ganashe
 
 походу приедться делать приватный гихаб
-
 
 В контракте Crowdsale:
 
@@ -38,28 +36,24 @@ WeiRaised
 - WhiteList - инвестор из данного списка участвует в ICO() - 10 часов
 - WaitList - 10 часов
 - проверка на наличие н=инвестора в WhiteList и WaitList в payable
-- tokenTransferFromHolding - для отправки токенов со счета escrow
-- сжигание нераспределеннх токенов -
-- finalize - complete
+(+)     - tokenTransferFromHolding - для отправки токенов со счета escrow
+(+)     - сжигание нераспределеннх токенов -
+(+)     - finalize - complete
 - timeline по блокам
-- харкап в 3800 eth complete
-
+(+)     - харкап в 3800 eth complete
 
 для web3.js
 
 balanseOf
 WeiRaised
-
 */
 pragma solidity ^0.4.18;
-
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
 * @dev Source code hence -
 * https://github.com/PillarDevelopment/Barbarossa-Git/blob/master/contracts/BarbarossaInvestToken.sol
 *
 */
-
 /*********************************************************************************************************************
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error
@@ -186,50 +180,37 @@ contract TokenERC20 is Ownable {
 
 contract WhalesburgCrowdsale is TokenERC20 {
     using SafeMath for uint;
-
     address public multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
     address public escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
     address public bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
     address public earlyInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
     address public developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address public founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
-
-    uint public startIcoBlock = 2755500; // test roopsten - в среднем 6 секунд - 14 400 в сутках
+    uint public startIcoBlock = 1520321276; //2755500; // test roopsten - в среднем 6 секунд - 14 400 в сутках
     // start TokenSale block
-
-    uint public endIcoBlock = 2813100; // примерно до 6 марта
+    uint public endIcoBlock = 1520666876;//2813100; // примерно до 6 марта
     // End TokenSale block
-
     uint public preICOTokens = 10000000;  //  вымышленное количество - например 10%
     // tokens for participants preICO
-
     uint public foundersReserve = 10000000;
     // frozen tokens for Founders
-
     uint public developmentReserve = 20500000;
     // frozen tokens for Founders
-
     uint public bountyReserve = 3500000;
     // tokes for bounty program
-
     uint public maxDayLimetSale; // от номера блокаи
     // variable for
-
     uint public hardCap = 3800000000000000000000;
     // 3 800 ether
     bool public isFinalized = false;
     bool public distribute = false;
-
     uint public weisRaised;
     // collect ethereum
-
     mapping(address => uint) public WhiteList;
     // храним список WhiteList
     mapping(address => uint) public  WaitList;
     // храним список WaitList
-
     event Finalized();
-
     modifier isUnderHardCap() {
         require(weisRaised <= hardCap);
         _;
@@ -245,30 +226,22 @@ contract WhalesburgCrowdsale is TokenERC20 {
     function finalize() onlyOwner public {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
         require(block.number > endIcoBlock || weisRaised > hardCap); // только тут поменять на блоки с времени
-
         //finalization();
         Finalized();
-
         isFinalized = true;
         Burn(msg.sender, avaliableSupply);
     }
 
-
     function distributionTokens() public onlyOwner {
         require(!distribute);
-
-        // отправили средства баунти
+        // отправили средства баунти 3,5
         _transfer(this, bounty, bountyReserve*DEC);
-
-        // отправили средства ранних инветосторов
+        // отправили средства ранних инветосторов 10
         _transfer(this, earlyInvestors, preICOTokens*DEC);
-
         // отправили средства для заморозки (developmentReserve+foundersReserve)
         _transfer(this, escrow, (developmentReserve+foundersReserve)*DEC);
 
-
         // записать маппинги
-
         // founders(10 000 000) + bounthy(3 500 000) + developers(20 500 000) + InvestorsPreISO(10 000 000)
         //_transfer(this, beneficiary, (foundersReserve+developmentReserve+bounty+preICOTokens)*DEC); // frozen all
         //_transfer(this, team, 7500000*DEC); // immediately Team 1/2
@@ -280,7 +253,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
         //_transfer(this, marketing, 5900000*DEC); // immediately marketing all
         //tokenFrozenReserve[reserve] = tokenFrozenReserve[reserve].add(10000000*DEC);  // immediately reserve all
         //tokenFrozenBounty[bounty] = tokenFrozenBounty[bounty].add(3000000*DEC); // immediately bounty all frozen
-
         avaliableSupply -= 44000000*DEC;
         distribute = true;
     }
@@ -292,9 +264,8 @@ contract WhalesburgCrowdsale is TokenERC20 {
         _transfer(this, _investor, _amount);
     }
 
-
     function () isUnderHardCap public payable {
-        //require(block > startIcoBlock && block < endIcoBlock); - неправильно
+        require(now > startIcoBlock && now < endIcoBlock); //- неправильно
         // проверка что отправляемые средства >= 0,01 ethereum
         sell(msg.sender, msg.value);
         assert(msg.value >= 1 ether / 100);
@@ -304,13 +275,21 @@ contract WhalesburgCrowdsale is TokenERC20 {
         // добавляем в адрес инвестора количество инвестированных эфиров
         //balances[msg.sender] = balances[msg.sender].add(msg.value);
         multisig.transfer(msg.value);
-
     }
 
-    function transferFromFrozen() public holdersSupport {
-
+    function transferFromFrozen(address _investor, uint256 amount) public holdersSupport {
+        require(now > endIcoBlock);
+        // вывод средств на счет фаундеров
+        if(msg.sender == founders && now > 1552608001) { // 03/15/2019 @ 12:00am (UTC)
+            _transfer(escrow, founders, foundersReserve*DEC);
+            // вывод средств на счет девелоперов
+        } else if(msg.sender == developers && now > endIcoBlock) { //нет параметров проерки, пускай будет конец ICO
+            _transfer(escrow, developers, developmentReserve*DEC);
+            // владелец контракта распределяет средства
+        } else if(msg.sender == owner) {
+            _transfer(escrow, _investor, amount);
+        }
     }
-
 }
 
 
