@@ -7,7 +7,7 @@
 (+)     - ефир отправляется на мультисиг
 (+)     - убрать оракул - сколько стоит доллар - была првязка к доллару
 
-лучше сделать несколькими контрактами из за WhiteList и WaitList
+лучше сделать несколькими контрактами из за WhiteList
 
 сроки - 8-9 марта - на аудит
 тестирование ganashe
@@ -17,8 +17,7 @@
 - function maxDayLimit (для ежедневного капа максимальной покупки) - 20 часов
 - payable
 - WhiteList - инвестор из данного списка участвует в ICO() - 10 часов
-- WaitList - 10 часов
-- проверка на наличие н=инвестора в WhiteList и WaitList в payable
+- проверка на наличие н=инвестора в WhiteList  в payable
 (+)     - tokenTransferFromHolding - для отправки токенов со счета escrow
 (+)     - сжигание нераспределеннх токенов -
 (+)     - finalize - complete
@@ -32,10 +31,7 @@ WeiRaised
 pragma solidity ^0.4.18;
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
-* @dev Source code hence -
-* https://github.com/PillarDevelopment/Barbarossa-Git/blob/master/contracts/BarbarossaInvestToken.sol
-*
-*/
+* @dev
 /*********************************************************************************************************************
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error
@@ -109,7 +105,7 @@ contract TokenERC20 is Ownable {
     string public symbol;
     uint256 public decimals = 18;
     uint256 DEC = 10 ** uint256(decimals);
-    address public owner;  //0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
+    address public owner;
     // all tokens
     uint256 public totalSupply;
     // tokens for sale
@@ -170,7 +166,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address public developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address public founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
     address white_members;
-    address wait_memebers;
 
     uint public startICO = 1520338635; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
@@ -197,8 +192,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     mapping(address => bool) public White_List;
     // храним список WhiteList
-    mapping(address => bool) public Wait_List;
-    // храним список WaitList
     mapping(address => uint) public roundSaleLimit;
 
     event Finalized();
@@ -257,8 +250,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
             _transfer(this, _investor, _amount);
             roundSaleLimit[_investor] = roundSaleLimit[_investor].sub(_amount); // добавили купленное в mappig инвестора
             //cap = cap+_amount;
-        } else if(Wait_List[wait_memebers] == true) {
-            // вызов функции можно ли ему в WhiteList
         } else {
             revert();
         }
