@@ -28,10 +28,6 @@
 balanseOf
 WeiRaised
 */
-pragma solidity ^0.4.18;
-/*
-* @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
-* @dev
 /*********************************************************************************************************************
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error
@@ -103,14 +99,14 @@ contract TokenERC20 is Ownable {
 
     string public name;
     string public symbol;
-    uint256 public decimals = 18;
+    uint256 public decimals = 8;
     uint256 DEC = 10 ** uint256(decimals);
-    address public owner;
+    address public owner;  //0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
     // all tokens
     uint256 public totalSupply;
     // tokens for sale
     uint256 public avaliableSupply;  // totalSupply - all reserve
-    uint256 public constant buyPrice = 1000 szabo; //0,001 ether
+    uint256 public constant buyPrice = 1000000000000000; //0,001 ether
 
     mapping (address => uint256) public balanceOf;
 
@@ -155,7 +151,10 @@ contract TokenERC20 is Ownable {
         return true;
     }
 }
-
+/*********************************************************************************************************************
+----------------------------------------------------------------------------------------------------------------------
+* @dev WhalesburgCrowdsale contract
+*/
 contract WhalesburgCrowdsale is TokenERC20 {
     using SafeMath for uint;
 
@@ -165,7 +164,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address public privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
     address public developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address public founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
-    address white_members;
+    //address white_members;
 
     uint public startICO = 1520338635; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
@@ -245,31 +244,29 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     function sell(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
-        _transfer(this, _investor, _amount);
-/*
-   if(White_List[white_members] == true) {
-            //maxDayLimit(); //
-            //require(_amount <= roundSaleLimit[_investor]); // проверили что кап не достигнут
-            //roundSaleLimit[_investor] = roundSaleLimit[_investor].sub(_amount); // добавили купленное в mappig инвестора
-            //cap = cap+_amount;
-        } else {
-            revert();
-        }
-*/
+        /*
+           if(White_List[white_members] == true) {
+                    //maxDayLimit(); //
+                    //require(_amount <= roundSaleLimit[_investor]); // проверили что кап не достигнут
+                    //roundSaleLimit[_investor] = roundSaleLimit[_investor].sub(_amount); // добавили купленное в mappig инвестора
+                    //cap = cap+_amount;
+                } else {
+                    revert();
+                }
+        */
+
         require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
         avaliableSupply -= _amount;
-        //_transfer(this, _investor, _amount);
+        _transfer(this, _investor, _amount);
     }
 
     function () isUnderHardCap public payable {
-        require(now > startICO && now < endICO); //- даты ICO
-        assert(msg.value >= 1 ether / 100); // проверка что средства не меньше чем 1 токен
+        require(now > startICO && now < endICO);
         sell(msg.sender, msg.value);
-        //beneficiary.transfer(msg.value); // средства отправляюся на адрес бенефециара
+        // проверка что отправляемые средства >= 0,001 ethereum
+        assert(msg.value >= 1 ether / 1000);
         // добавляем получаные средства в собранное
         weisRaised = weisRaised.add(msg.value);
-        // добавляем в адрес инвестора количество инвестированных эфиров
-        //balances[msg.sender] = balances[msg.sender].add(msg.value);
         multisig.transfer(msg.value);
     }
 
