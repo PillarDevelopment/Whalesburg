@@ -227,7 +227,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
         avaliableSupply -= 80200000*DEC;
         distribute = true;
     }
-
+    /*
     function maxDayLimit() internal {
         if(now > startICO && now <  startICO + 7200 ) { //первые 2 часа с начала
             individualRoundCap = 500000000000000000; //0,5 ETH
@@ -241,19 +241,21 @@ contract WhalesburgCrowdsale is TokenERC20 {
             revert();
         }
     }
+    */
 
     function sell(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
-        if(White_List[white_members] == true) {
-            maxDayLimit(); //
-            require(_amount <= roundSaleLimit[_investor]); // проверили что кап не достигнут
-            _transfer(this, _investor, _amount);
-            roundSaleLimit[_investor] = roundSaleLimit[_investor].sub(_amount); // добавили купленное в mappig инвестора
+        _transfer(this, _investor, _amount);
+/*
+   if(White_List[white_members] == true) {
+            //maxDayLimit(); //
+            //require(_amount <= roundSaleLimit[_investor]); // проверили что кап не достигнут
+            //roundSaleLimit[_investor] = roundSaleLimit[_investor].sub(_amount); // добавили купленное в mappig инвестора
             //cap = cap+_amount;
         } else {
             revert();
         }
-
+*/
         require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
         avaliableSupply -= _amount;
         //_transfer(this, _investor, _amount);
