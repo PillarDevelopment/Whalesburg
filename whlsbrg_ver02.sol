@@ -174,7 +174,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     // start TokenSale block
     uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
-    uint public privateSaleInvestors = 46200000;  //  вымышленное количество - например 10%
+    uint public privateSaleTokens = 46200000;
     // tokens for participants preICO
     uint public foundersReserve = 10000000;
     // frozen tokens for Founders
@@ -211,7 +211,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     function finalize() onlyOwner public {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
-        require(block.number > endIcoBlock || weisRaised > hardCap); // только тут поменять на блоки с времени
+        require(now > endICO || weisRaised > hardCap); // только тут поменять на блоки с времени
 
         //finalization();
         Finalized();
@@ -224,7 +224,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
         // отправили средства баунти
         _transfer(this, bounty, bountyReserve*DEC);
         // отправили средства ранних инветосторов
-        _transfer(this, earlyInvestors, preICOTokens*DEC);
+        _transfer(this, privateInvestors, privateSaleTokens*DEC);
         // отправили средства для заморозки (developmentReserve+foundersReserve)
         _transfer(this, escrow, (developmentReserve+foundersReserve)*DEC);
         // записать маппинги
@@ -262,6 +262,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
         multisig.transfer(msg.value);
 
     }
-    function transferFromFrozen() public holdersSupport {
-    }
+
+    /* function transferFromFrozen() public holdersSupport {
+    } */
 }
