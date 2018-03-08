@@ -1,6 +1,4 @@
 pragma solidity ^0.4.17;
-
-
 /**
  * @title ERC20Basic
  * @dev Simpler version of ERC20 interface
@@ -18,8 +16,6 @@ contract ERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
-
-
 /**
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error
