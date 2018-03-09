@@ -36,7 +36,6 @@ pragma solidity ^0.4.18;
 * https://github.com/PillarDevelopment/Barbarossa-Git/blob/master/contracts/BarbarossaInvestToken.sol
 *
 */
-
 /*********************************************************************************************************************
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error
@@ -108,7 +107,7 @@ contract TokenERC20 is Ownable {
 
     string public name;
     string public symbol;
-    uint256 public decimals = 18;
+    uint256 public decimals = 8;
     uint256 DEC = 10 ** uint256(decimals);
     address public owner;  //0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
     // all tokens
@@ -163,56 +162,45 @@ contract TokenERC20 is Ownable {
 contract WhalesburgCrowdsale is TokenERC20 {
     using SafeMath for uint;
 
-    address multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
-    address escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
-    address bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
-    address privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
-    address developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
-    address founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
+    address public multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
+    address public escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
+    address public bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
+    address public privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
+    address public developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
+    address public founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
     uint public startICO = 1520338635; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
     uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
-    uint privateSaleTokens = 46200000;
+    uint public privateSaleTokens = 46200000;
     // tokens for participants preICO
-    uint foundersReserve = 10000000;
+    uint public foundersReserve = 10000000;
     // frozen tokens for Founders
-    uint developmentReserve = 20500000;
+    uint public developmentReserve = 20500000;
     // frozen tokens for Founders
-    uint bountyReserve = 3500000;
+    uint public bountyReserve = 3500000;
     // tokes for bounty program
-    uint maxDayLimetSale; // от номера блокаи
+    uint public maxDayLimetSale; // от номера блокаи
     // variable for
     uint public hardCap = 1421640000000000000000;
     // 1421.64 ether
     uint256 public investors; // количество инвесторов проекта
-    uint256 public membersWL; // количество участники вайт листа в мепинге
 
-    address[] public WhiteList = [
-    0x2Ab1dF22ef514ab94518862082E653457A5c1aFc,
-    0x33648E28d3745218b78108016B9a138ab1e6dA2C,
-    0xD4B65C7759460aaDB4CE4735db8037976CB115bb
-    ,0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2
-    ,0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3
-    ,0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F,
-    0x81Cfe8eFdb6c7B7218DDd5F6bda3AA4cd1554Fd2,
-    0xC032D3fCA001b73e8cC3be0B75772329395caA49,
-    0x317e98510Fdb4a82b70C70851b89e855dB5BCe01,
-    0xBF43564d27e56a0F2A6b861a55bDAa204a105764]; // массив WL
 
     bool public isFinalized = false;
-    bool  distribute = false;
+    bool public distribute = false;
 
     uint public weisRaised;
     // collect ethereum
 
-    //mapping(address => uint256) public WhiteList;
-    // храним список WhiteList
     mapping (address => bool) onChain;
-    //address[] tokenHolders;  // tokenHolders.length
-    event Finalized();
+    // храним список WhiteList
+    //mapping(address => uint) public  WaitList;
     address[] tokenHolders;
+
+    // храним список WaitList
+    event Finalized();
 
     modifier isUnderHardCap() {
         require(weisRaised <= hardCap);
@@ -222,18 +210,18 @@ contract WhalesburgCrowdsale is TokenERC20 {
         require(msg.sender ==  developers|| msg.sender == founders || msg.sender == owner);
         _;
     }
-
-
     function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {}
 
     function finalize() onlyOwner public {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
         require(now > endICO || weisRaised > hardCap); // только тут поменять на блоки с времени
+
+        //finalization();
         Finalized();
+
         isFinalized = true;
         Burn(msg.sender, avaliableSupply);
     }
-
     function distributionTokens() public onlyOwner {
         require(!distribute);
         // отправили средства баунти
@@ -243,6 +231,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
         // отправили средства для заморозки (developmentReserve+foundersReserve)
         _transfer(this, escrow, (developmentReserve+foundersReserve)*DEC);
         // записать маппинги
+
         avaliableSupply -= 80200000*DEC;
         distribute = true;
     }
@@ -256,21 +245,11 @@ contract WhalesburgCrowdsale is TokenERC20 {
             onChain[msg.sender] = true;
         }
         investors = tokenHolders.length; // количество инвесторов всего
-        membersWL = WhiteList.length; // количество участников вайт листа
     }
     function () isUnderHardCap public payable {
-        require(now > startICO && now < endICO);
         sell(msg.sender, msg.value);
         assert(msg.value >= 1 ether / 100);
         weisRaised = weisRaised.add(msg.value);
         multisig.transfer(msg.value);
     }
-
-    function addMembersWL(address _members) public onlyOwner {
-        require(WhiteList.length >= 2800); //проверка что не переполнен массив WL
-        WhiteList.push(_members); // добавляем инвестора в WL
-    }
-    /* function transferFromFrozen() public holdersSupport {
-    } */
-
 }
