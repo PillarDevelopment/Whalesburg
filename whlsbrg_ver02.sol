@@ -108,7 +108,7 @@ contract TokenERC20 is Ownable {
 
     string public name;
     string public symbol;
-    uint256 public decimals = 8;
+    uint256 public decimals = 18;
     uint256 DEC = 10 ** uint256(decimals);
     address public owner;  //0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
     // all tokens
@@ -163,40 +163,42 @@ contract TokenERC20 is Ownable {
 contract WhalesburgCrowdsale is TokenERC20 {
     using SafeMath for uint;
 
-    address public multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
-    address public escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
-    address public bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
-    address public privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
-    address public developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
-    address public founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
+    address multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
+    address escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
+    address bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
+    address privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
+    address developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
+    address founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
     uint public startICO = 1520338635; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
     uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
-    uint public privateSaleTokens = 46200000;
+    uint privateSaleTokens = 46200000;
     // tokens for participants preICO
-    uint public foundersReserve = 10000000;
+    uint foundersReserve = 10000000;
     // frozen tokens for Founders
-    uint public developmentReserve = 20500000;
+    uint developmentReserve = 20500000;
     // frozen tokens for Founders
-    uint public bountyReserve = 3500000;
+    uint bountyReserve = 3500000;
     // tokes for bounty program
-    uint public maxDayLimetSale; // от номера блокаи
+    uint maxDayLimetSale; // от номера блокаи
     // variable for
     uint public hardCap = 1421640000000000000000;
     // 1421.64 ether
+    uint256 public investors;
+
 
     bool public isFinalized = false;
-    bool public distribute = false;
+    bool  distribute = false;
 
     uint public weisRaised;
     // collect ethereum
 
     mapping(address => uint) public WhiteList;
     // храним список WhiteList
-    //mapping(address => uint) public  WaitList;
-    // храним список WaitList
+    mapping (address => bool) onChain;
+    address[] tokenHolders;  // tokenHolders.length
     event Finalized();
 
     modifier isUnderHardCap() {
@@ -212,13 +214,12 @@ contract WhalesburgCrowdsale is TokenERC20 {
     function finalize() onlyOwner public {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
         require(now > endICO || weisRaised > hardCap); // только тут поменять на блоки с времени
-
         //finalization();
         Finalized();
-
         isFinalized = true;
         Burn(msg.sender, avaliableSupply);
     }
+
     function distributionTokens() public onlyOwner {
         require(!distribute);
         // отправили средства баунти
@@ -239,7 +240,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
         //_transfer(this, marketing, 5900000*DEC); // immediately marketing all
         //tokenFrozenReserve[reserve] = tokenFrozenReserve[reserve].add(10000000*DEC);  // immediately reserve all
         //tokenFrozenBounty[bounty] = tokenFrozenBounty[bounty].add(3000000*DEC); // immediately bounty all frozen
-
         avaliableSupply -= 80200000*DEC;
         distribute = true;
     }
@@ -248,21 +248,22 @@ contract WhalesburgCrowdsale is TokenERC20 {
         require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
         avaliableSupply -= _amount;
         _transfer(this, _investor, _amount);
+        if (!onChain[msg.sender]) {
+            tokenHolders.push(msg.sender);
+            onChain[msg.sender] = true;
+        }
+        investors = tokenHolders.length;
     }
     function () isUnderHardCap public payable {
         //require(block > startIcoBlock && block < endIcoBlock); - неправильно
         // проверка что отправляемые средства >= 0,01 ethereum
         sell(msg.sender, msg.value);
         assert(msg.value >= 1 ether / 100);
-        //beneficiary.transfer(msg.value); // средства отправляюся на адрес бенефециара
         // добавляем получаные средства в собранное
         weisRaised = weisRaised.add(msg.value);
         // добавляем в адрес инвестора количество инвестированных эфиров
-        //balances[msg.sender] = balances[msg.sender].add(msg.value);
         multisig.transfer(msg.value);
-
     }
-
     /* function transferFromFrozen() public holdersSupport {
     } */
 }
