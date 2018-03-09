@@ -186,8 +186,20 @@ contract WhalesburgCrowdsale is TokenERC20 {
     // variable for
     uint public hardCap = 1421640000000000000000;
     // 1421.64 ether
-    uint256 public investors;
+    uint256 public investors; // количество инвесторов проекта
+    uint256 public membersWL; // количество участники вайт листа в мепинге
 
+    address[] public WhiteList = [
+    0x2Ab1dF22ef514ab94518862082E653457A5c1aFc,
+    0x33648E28d3745218b78108016B9a138ab1e6dA2C,
+    0xD4B65C7759460aaDB4CE4735db8037976CB115bb
+    ,0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2
+    ,0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3
+    ,0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F,
+    0x81Cfe8eFdb6c7B7218DDd5F6bda3AA4cd1554Fd2,
+    0xC032D3fCA001b73e8cC3be0B75772329395caA49,
+    0x317e98510Fdb4a82b70C70851b89e855dB5BCe01,
+    0xBF43564d27e56a0F2A6b861a55bDAa204a105764]; // массив WL
 
     bool public isFinalized = false;
     bool  distribute = false;
@@ -195,11 +207,12 @@ contract WhalesburgCrowdsale is TokenERC20 {
     uint public weisRaised;
     // collect ethereum
 
-    mapping(address => uint) public WhiteList;
+    //mapping(address => uint256) public WhiteList;
     // храним список WhiteList
     mapping (address => bool) onChain;
-    address[] tokenHolders;  // tokenHolders.length
+    //address[] tokenHolders;  // tokenHolders.length
     event Finalized();
+    address[] tokenHolders;
 
     modifier isUnderHardCap() {
         require(weisRaised <= hardCap);
@@ -209,12 +222,13 @@ contract WhalesburgCrowdsale is TokenERC20 {
         require(msg.sender ==  developers|| msg.sender == founders || msg.sender == owner);
         _;
     }
+
+
     function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {}
 
     function finalize() onlyOwner public {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
         require(now > endICO || weisRaised > hardCap); // только тут поменять на блоки с времени
-        //finalization();
         Finalized();
         isFinalized = true;
         Burn(msg.sender, avaliableSupply);
@@ -229,17 +243,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
         // отправили средства для заморозки (developmentReserve+foundersReserve)
         _transfer(this, escrow, (developmentReserve+foundersReserve)*DEC);
         // записать маппинги
-        // founders(10 000 000) + bounthy(3 500 000) + developers(20 500 000) + InvestorsPreISO(10 000 000)
-        //_transfer(this, beneficiary, (foundersReserve+developmentReserve+bounty+preICOTokens)*DEC); // frozen all
-        //_transfer(this, team, 7500000*DEC); // immediately Team 1/2
-        //tokenFrozenTeam[team] = tokenFrozenTeam[team].add(7500000*DEC);
-        //tokenFrozenTeam[team] += 7500000*DEC; // кладем в меппинг первые токены
-        //_transfer(this, consult, 2000000*DEC); // immediately advisers 1/3
-        //tokenFrozenConsult[consult] = tokenFrozenConsult[consult].add(4000000*DEC); // в меппинг кладем 6 000 000 - 4 000 000
-        //_transfer(this, test, 100000*DEC); // immediately testers all
-        //_transfer(this, marketing, 5900000*DEC); // immediately marketing all
-        //tokenFrozenReserve[reserve] = tokenFrozenReserve[reserve].add(10000000*DEC);  // immediately reserve all
-        //tokenFrozenBounty[bounty] = tokenFrozenBounty[bounty].add(3000000*DEC); // immediately bounty all frozen
         avaliableSupply -= 80200000*DEC;
         distribute = true;
     }
@@ -252,18 +255,22 @@ contract WhalesburgCrowdsale is TokenERC20 {
             tokenHolders.push(msg.sender);
             onChain[msg.sender] = true;
         }
-        investors = tokenHolders.length;
+        investors = tokenHolders.length; // количество инвесторов всего
+        membersWL = WhiteList.length; // количество участников вайт листа
     }
     function () isUnderHardCap public payable {
-        //require(block > startIcoBlock && block < endIcoBlock); - неправильно
-        // проверка что отправляемые средства >= 0,01 ethereum
+        require(now > startICO && now < endICO);
         sell(msg.sender, msg.value);
         assert(msg.value >= 1 ether / 100);
-        // добавляем получаные средства в собранное
         weisRaised = weisRaised.add(msg.value);
-        // добавляем в адрес инвестора количество инвестированных эфиров
         multisig.transfer(msg.value);
+    }
+
+    function addMembersWL(address _members) public onlyOwner {
+        require(WhiteList.length >= 2800); //проверка что не переполнен массив WL
+        WhiteList.push(_members); // добавляем инвестора в WL
     }
     /* function transferFromFrozen() public holdersSupport {
     } */
+
 }
