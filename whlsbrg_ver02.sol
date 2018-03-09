@@ -107,14 +107,16 @@ contract TokenERC20 is Ownable {
 
     string public name;
     string public symbol;
-    uint256 public decimals = 8;
+    //!!!!!!!!!! не меняй его !!!!!!!!!!!!!!!!!!!
+    uint256 public decimals = 8; //!!!!!!!!!!!!!
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
     uint256 DEC = 10 ** uint256(decimals);
-    address public owner;  //0x6a59CB8b2dfa32522902bbecf75659D54dD63F95
-    // all tokens
+    address public owner;
     uint256 public totalSupply;
-    // tokens for sale
-    uint256 public avaliableSupply;  // totalSupply - all reserve
-    uint256 public constant buyPrice = 1000 szabo; //0,001 ether
+    uint256 public avaliableSupply;
+    uint256 public constant buyPrice = 1000 szabo;
 
     mapping (address => uint256) public balanceOf;
 
@@ -127,11 +129,11 @@ contract TokenERC20 is Ownable {
         string tokenSymbol
     ) public
     {
-        totalSupply = initialSupply * DEC;  // Update total supply with the decimal amount
-        balanceOf[this] = totalSupply;                // Give the creator all initial tokens
-        avaliableSupply = balanceOf[this];            // Show how much tokens on contract
-        name = tokenName;                                   // Set the name for display purposes
-        symbol = tokenSymbol;                               // Set the symbol for display purposes
+        totalSupply = initialSupply * DEC;
+        balanceOf[this] = totalSupply;
+        avaliableSupply = balanceOf[this];
+        name = tokenName;
+        symbol = tokenSymbol;
         owner = msg.sender;
     }
 
@@ -151,9 +153,9 @@ contract TokenERC20 is Ownable {
     }
 
     function burn(uint256 _value) public onlyOwner returns (bool success) {
-        require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough
-        balanceOf[msg.sender] -= _value;            // Subtract from the sender
-        totalSupply -= _value;                      // Updates totalSupply
+        require(balanceOf[msg.sender] >= _value);
+        balanceOf[msg.sender] -= _value;
+        totalSupply -= _value;
         avaliableSupply -= _value;
         Burn(msg.sender, _value);
         return true;
@@ -192,14 +194,11 @@ contract WhalesburgCrowdsale is TokenERC20 {
     bool public distribute = false;
 
     uint public weisRaised;
-    // collect ethereum
 
-    mapping (address => bool) onChain;
-    // храним список WhiteList
+    mapping (address => bool) onChain; // для количества инвесторов
     //mapping(address => uint) public  WaitList;
     address[] tokenHolders;
 
-    // храним список WaitList
     event Finalized();
 
     modifier isUnderHardCap() {
@@ -216,7 +215,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
         require(now > endICO || weisRaised > hardCap); // только тут поменять на блоки с времени
 
-        //finalization();
         Finalized();
 
         isFinalized = true;
@@ -237,7 +235,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     }
     function sell(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
-        require(amount > avaliableSupply); // проверка что запрашиваемое количество токенов меньше чем есть на балансе
+        require(amount > avaliableSupply);
         avaliableSupply -= _amount;
         _transfer(this, _investor, _amount);
         if (!onChain[msg.sender]) {
@@ -247,6 +245,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
         investors = tokenHolders.length; // количество инвесторов всего
     }
     function () isUnderHardCap public payable {
+        require(now > startICO && now < endICO);
         sell(msg.sender, msg.value);
         assert(msg.value >= 1 ether / 100);
         weisRaised = weisRaised.add(msg.value);
