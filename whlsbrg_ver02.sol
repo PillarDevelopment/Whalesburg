@@ -1,4 +1,13 @@
 /*
+totalSupply - показывает не правильно
+как сделать кап
+- в мапинг адреса отправителя класть количество amount
+- делать проверку на текущее значение
+- сумировать
+- сделать паблик меппинг чтобы каждый по своему адресу увидел свой лимит - или доступный лимит
+
+
+
 (+)     нет софт капа
 (+)     скидок нет
 
@@ -170,7 +179,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
-    uint public startICO = 1520338635; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
+    uint public startICO = 1520723310; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
     uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
@@ -182,7 +191,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     // frozen tokens for Founders
     uint  bountyReserve = 3500000;
     // tokes for bounty program
-    uint public maxDayLimetSale; // от номера блокаи
+    uint public individualRoundCap; // от номера
     // variable for
     uint public hardCap = 1421640000000000000000;
     // 1421.64 ether
@@ -193,6 +202,10 @@ contract WhalesburgCrowdsale is TokenERC20 {
     bool  distribute = false;
 
     uint public weisRaised;
+    //
+
+    mapping (address => uint256) public moneySpent;
+    //
 
     mapping (address => bool) onChain; // для количества инвесторов
     address[] tokenHolders;
@@ -273,9 +286,14 @@ contract WhalesburgCrowdsale is TokenERC20 {
     function () isUnderHardCap public payable {
         if(isWhitelisted(msg.sender)) {
             require(now > startICO && now < endICO);
+
+            currentSaleLimit();
+            require(msg.value <= individualRoundCap); // пока проверка просто переменоой - разово сработает
+
             sell(msg.sender, msg.value);
             assert(msg.value >= 1 ether / 100);
             weisRaised = weisRaised.add(msg.value);
+            moneySpent[msg.sender] = moneySpent[msg.sender].add(msg.value);
             multisig.transfer(msg.value);
         } else {
             revert();
@@ -285,4 +303,19 @@ contract WhalesburgCrowdsale is TokenERC20 {
         //whitelist[_whitelist[i]] = true;
         return whitelist[who];
     }
+    // собственно он обозначил переменную и пошел дальше, ему похуй
+    function currentSaleLimit() internal {
+        if(now > startICO && now <  startICO + 7200 ) { //первые 2 часа с начала
+            individualRoundCap = 500000000000000000; //0,5 ETH
+        } else if(now >= startICO + 7200 && now < startICO + 14400) { //следующие 2 часа
+            individualRoundCap = 2000000000000000000; // 2 ETH
+        } else if(now >= startICO + 14400 && now < startICO + 86400) { // следующие 20 часов
+            individualRoundCap = 10000000000000000000; // 10 ETH
+        } else if(now >= startICO + 86400 && now < endICO) { // следующие 6 дней
+            individualRoundCap = hardCap; //1400 ETH
+        } else { // далее
+            revert();
+        }
+    }
 }
+//
