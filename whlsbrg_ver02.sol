@@ -111,7 +111,6 @@ contract TokenERC20 is Ownable {
     uint256 public decimals = 8; //!!!!!!!!!!!!!
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
     uint256 DEC = 10 ** uint256(decimals);
     address public owner;
     uint256 public totalSupply;
@@ -188,7 +187,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     uint public hardCap = 1421640000000000000000;
     // 1421.64 ether
     uint256 public investors; // количество инвесторов проекта
-
+    uint256 public membersWhiteList;
 
     bool public isFinalized = false;
     bool public distribute = false;
@@ -214,7 +213,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
     0xC032D3fCA001b73e8cC3be0B75772329395caA49
     ]; // массив адресов вайтлиста
 
-
     event Finalized();
 
     modifier isUnderHardCap() {
@@ -225,16 +223,17 @@ contract WhalesburgCrowdsale is TokenERC20 {
         require(msg.sender ==  developers|| msg.sender == founders || msg.sender == owner);
         _;
     }
-    function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {}
+    function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {
 
+
+    }
     // функция добавляет адреса в вайт лист
     function addWhiteList() onlyOwner{
         for (var i=0; i<_whitelist.length; i++) {
             whitelist[_whitelist[i]] = true;
+            membersWhiteList =_whitelist.length;
         }
     }
-
-
     function finalize() onlyOwner public {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
         require(now > endICO || weisRaised > hardCap); // только тут поменять на блоки с времени
@@ -253,7 +252,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
         // отправили средства для заморозки (developmentReserve+foundersReserve)
         _transfer(this, escrow, (developmentReserve+foundersReserve)*DEC);
         // записать маппинги
-
         avaliableSupply -= 80200000*DEC;
         distribute = true;
     }
@@ -279,7 +277,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
             revert();
         }
     }
-
     function isWhitelisted(address who) public view returns(bool) {
         //whitelist[_whitelist[i]] = true;
         return whitelist[who];
