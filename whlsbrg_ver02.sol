@@ -164,23 +164,23 @@ contract WhalesburgCrowdsale is TokenERC20 {
     using SafeMath for uint;
 
     address public multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
-    address public escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
-    address public bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
-    address public privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
-    address public developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
-    address public founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
+    address  escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
+    address  bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
+    address  privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
+    address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
+    address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
     uint public startICO = 1520338635; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
     uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
-    uint public privateSaleTokens = 46200000;
+    uint  privateSaleTokens = 46200000;
     // tokens for participants preICO
-    uint public foundersReserve = 10000000;
+    uint  foundersReserve = 10000000;
     // frozen tokens for Founders
-    uint public developmentReserve = 20500000;
+    uint  developmentReserve = 20500000;
     // frozen tokens for Founders
-    uint public bountyReserve = 3500000;
+    uint  bountyReserve = 3500000;
     // tokes for bounty program
     uint public maxDayLimetSale; // от номера блокаи
     // variable for
@@ -190,7 +190,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     uint256 public membersWhiteList;
 
     bool public isFinalized = false;
-    bool public distribute = false;
+    bool  distribute = false;
 
     uint public weisRaised;
 
@@ -198,7 +198,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address[] tokenHolders;
 
     //белый лист участников
-    mapping (address => bool) public whitelist;
+    mapping (address => bool) whitelist;
     // индексное соответствие
 
     address[] public _whitelist = [
