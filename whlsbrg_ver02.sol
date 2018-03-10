@@ -223,13 +223,17 @@ contract WhalesburgCrowdsale is TokenERC20 {
         require(msg.sender ==  developers|| msg.sender == founders || msg.sender == owner);
         _;
     }
+
+
+
+
     function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {
-
-
+        addWhiteList();
+        distributionTokens();
     }
     // функция добавляет адреса в вайт лист
-    function addWhiteList() onlyOwner{
-        for (var i=0; i<_whitelist.length; i++) {
+    function addWhiteList() internal{
+        for (uint i=0; i<_whitelist.length; i++) {
             whitelist[_whitelist[i]] = true;
             membersWhiteList =_whitelist.length;
         }
@@ -243,7 +247,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
         isFinalized = true;
         Burn(msg.sender, avaliableSupply);
     }
-    function distributionTokens() public onlyOwner {
+    function distributionTokens() internal {
         require(!distribute);
         // отправили средства баунти
         _transfer(this, bounty, bountyReserve*DEC);
