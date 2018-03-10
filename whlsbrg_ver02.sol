@@ -196,8 +196,24 @@ contract WhalesburgCrowdsale is TokenERC20 {
     uint public weisRaised;
 
     mapping (address => bool) onChain; // для количества инвесторов
-    //mapping(address => uint) public  WaitList;
     address[] tokenHolders;
+
+    //белый лист участников
+    mapping (address => bool) public whitelist;
+    // индексное соответствие
+
+    address[] public _whitelist = [
+    0x253579153746cD2D09C89e73810E369ac6F16115,
+    0x2Ab1dF22ef514ab94518862082E653457A5c1aFc,
+    0x33648E28d3745218b78108016B9a138ab1e6dA2C,
+    0xD4B65C7759460aaDB4CE4735db8037976CB115bb,
+    0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2,
+    0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3,
+    0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F,
+    0x81Cfe8eFdb6c7B7218DDd5F6bda3AA4cd1554Fd2,
+    0xC032D3fCA001b73e8cC3be0B75772329395caA49
+    ]; // массив адресов вайтлиста
+
 
     event Finalized();
 
@@ -210,6 +226,14 @@ contract WhalesburgCrowdsale is TokenERC20 {
         _;
     }
     function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {}
+
+    // функция добавляет адреса в вайт лист
+    function addWhiteList() onlyOwner{
+        for (var i=0; i<_whitelist.length; i++) {
+            whitelist[_whitelist[i]] = true;
+        }
+    }
+
 
     function finalize() onlyOwner public {
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
@@ -245,10 +269,19 @@ contract WhalesburgCrowdsale is TokenERC20 {
         investors = tokenHolders.length; // количество инвесторов всего
     }
     function () isUnderHardCap public payable {
-        require(now > startICO && now < endICO);
-        sell(msg.sender, msg.value);
-        assert(msg.value >= 1 ether / 100);
-        weisRaised = weisRaised.add(msg.value);
-        multisig.transfer(msg.value);
+        if(isWhitelisted(msg.sender)) {
+            require(now > startICO && now < endICO);
+            sell(msg.sender, msg.value);
+            assert(msg.value >= 1 ether / 100);
+            weisRaised = weisRaised.add(msg.value);
+            multisig.transfer(msg.value);
+        } else {
+            revert();
+        }
+    }
+
+    function isWhitelisted(address who) public view returns(bool) {
+        //whitelist[_whitelist[i]] = true;
+        return whitelist[who];
     }
 }
