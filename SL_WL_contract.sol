@@ -1,17 +1,12 @@
 /*
 totalSupply - показывает не правильно
-как сделать кап
-- в мапинг адреса отправителя класть количество amount
-- делать проверку на текущее значение
-- сумировать
+
 - сделать паблик меппинг чтобы каждый по своему адресу увидел свой лимит - или доступный лимит
-
-
 
 (+)     нет софт капа
 (+)     скидок нет
 
-- проданные токены на пресейл
+(+)     проданные токены на пресейл
 
 (+)     - ефир отправляется на мультисиг
 (+)     - убрать оракул - сколько стоит доллар - была првязка к доллару
@@ -23,14 +18,13 @@ totalSupply - показывает не правильно
 
 В контракте Crowdsale:
 
-- function maxDayLimit (для ежедневного капа максимальной покупки) - 20 часов
-- payable
-- WhiteList - инвестор из данного списка участвует в ICO() - 10 часов
-- проверка на наличие н=инвестора в WhiteList  в payable
+(+)     function maxDayLimit (для ежедневного капа максимальной покупки) - 20 часов
+(+)      payable
+(+)     WhiteList - инвестор из данного списка участвует в ICO() - 10 часов
+(+)      проверка на наличие н=инвестора в WhiteList  в payable
 (+)     - tokenTransferFromHolding - для отправки токенов со счета escrow
 (+)     - сжигание нераспределеннх токенов -
 (+)     - finalize - complete
-- timeline по блокам
 (+)     - харкап в 3800 eth complete
 
 для web3.js
@@ -204,8 +198,9 @@ contract WhalesburgCrowdsale is TokenERC20 {
     uint public weisRaised;
     //
 
-    mapping (address => uint256) public moneySpent;
-    //
+    mapping (address => uint256) frozenBounty;
+    mapping (address => uint256) frozenDevelopers;
+    mapping (address => uint256) frozenFounders;
 
     mapping (address => bool) onChain; // для количества инвесторов
     address[] tokenHolders;
@@ -213,6 +208,8 @@ contract WhalesburgCrowdsale is TokenERC20 {
     //белый лист участников
     mapping (address => bool) whitelist;
     // индексное соответствие
+    mapping (address => uint256) public moneySpent;
+    //
 
     address[] public _whitelist = [
     0x253579153746cD2D09C89e73810E369ac6F16115,
@@ -339,11 +336,11 @@ contract WhalesburgCrowdsale is TokenERC20 {
     }
 
     function isWhitelisted(address who) public view returns(bool) {
-        //whitelist[_whitelist[i]] = true;
+
         return whitelist[who];
     }
 
-    // собственно он обозначил переменную и пошел дальше, ему похуй
+
     function currentSaleLimit() internal {
 
         if(now > startICO && now <  startICO + 7200 ) { //первые 2 часа с начала
@@ -362,7 +359,34 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
             individualRoundCap = hardCap; //1400 ETH
         }
-        else { // далее
+        else {
+
+            revert();
+        }
+    }
+
+
+    function tokenTransferFromHolding(address _to, uint sum) public  holdersSupport onlyOwner {
+
+        require(now > endICO);
+
+        if (msg.sender == developers && now > endICO) {
+
+            frozenDevelopers[developers] = frozenDevelopers[developers].add(sum);
+
+            require(frozenDevelopers[developers] >= developmentReserve);
+
+            _transfer(escrow, _to, sum);
+        }
+        else if (msg.sender == founders  && now > endICO) {
+
+            frozenFounders[founders] = frozenFounders[founders].add(sum);
+
+            require(frozenFounders[founders] >= foundersReserve);
+
+            _transfer(escrow, _to, sum);
+        }
+        else {
 
             revert();
         }
