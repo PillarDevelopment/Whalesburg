@@ -179,7 +179,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
-    uint public startICO = 1520723310; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
+    uint public startICO = 1520727740; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
     uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
@@ -228,39 +228,54 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     event Finalized();
 
+
     modifier isUnderHardCap() {
         require(weisRaised <= hardCap);
         _;
     }
+
+
     modifier holdersSupport() { //чьи заморож токены остались (team, consult, reserve, bounty)
         require(msg.sender ==  developers|| msg.sender == founders || msg.sender == owner);
         _;
     }
 
 
-
-
     function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {
+
         addWhiteList();
+
         distributionTokens();
     }
+
     // функция добавляет адреса в вайт лист
     function addWhiteList() internal{
+
         for (uint i=0; i<_whitelist.length; i++) {
+
             whitelist[_whitelist[i]] = true;
+
             membersWhiteList =_whitelist.length;
         }
     }
+
+
     function finalize() onlyOwner public {
+
         require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
+
         require(now > endICO || weisRaised > hardCap); // только тут поменять на блоки с времени
 
         Finalized();
 
         isFinalized = true;
+
         Burn(msg.sender, avaliableSupply);
     }
+
+
     function distributionTokens() internal {
+
         require(!distribute);
         // отправили средства баунти
         _transfer(this, bounty, bountyReserve*DEC);
@@ -270,52 +285,86 @@ contract WhalesburgCrowdsale is TokenERC20 {
         _transfer(this, escrow, (developmentReserve+foundersReserve)*DEC);
         // записать маппинги
         avaliableSupply -= 80200000*DEC;
+
         distribute = true;
     }
+
+
     function sell(address _investor, uint256 amount) internal {
+
         uint256 _amount = amount.mul(DEC).div(buyPrice);
+
         require(amount > avaliableSupply);
+
         avaliableSupply -= _amount;
+
         _transfer(this, _investor, _amount);
+
         if (!onChain[msg.sender]) {
+
             tokenHolders.push(msg.sender);
+
             onChain[msg.sender] = true;
         }
+
         investors = tokenHolders.length; // количество инвесторов всего
     }
-    function () isUnderHardCap public payable {
-        if(isWhitelisted(msg.sender)) {
-            require(now > startICO && now < endICO);
 
-            currentSaleLimit();
-            require(msg.value <= individualRoundCap); // пока проверка просто переменоой - разово сработает
+
+    function () isUnderHardCap public payable {
+
+        if(isWhitelisted(msg.sender)) { // verifacation that the sender is a member of WL
+
+            require(now > startICO && now < endICO); // chech ICO's date
+
+            currentSaleLimit(); // initialize current individualRoundCap
+            //require(msg.value <= moneySpent[msg.sender]); // это сработает, но что если в процессе отправки он превысит лимит
+            moneySpent[msg.sender] = moneySpent[msg.sender].add(msg.value);
+
+            require(moneySpent[msg.sender] <= individualRoundCap);
+
+            assert(msg.value >= 1 ether / 100);
 
             sell(msg.sender, msg.value);
-            assert(msg.value >= 1 ether / 100);
+
             weisRaised = weisRaised.add(msg.value);
-            moneySpent[msg.sender] = moneySpent[msg.sender].add(msg.value);
+
             multisig.transfer(msg.value);
-        } else {
+
+        }
+        else {
+
             revert();
         }
     }
+
     function isWhitelisted(address who) public view returns(bool) {
         //whitelist[_whitelist[i]] = true;
         return whitelist[who];
     }
+
     // собственно он обозначил переменную и пошел дальше, ему похуй
     function currentSaleLimit() internal {
+
         if(now > startICO && now <  startICO + 7200 ) { //первые 2 часа с начала
+
             individualRoundCap = 500000000000000000; //0,5 ETH
-        } else if(now >= startICO + 7200 && now < startICO + 14400) { //следующие 2 часа
+        }
+        else if(now >= startICO + 7200 && now < startICO + 14400) { //следующие 2 часа
+
             individualRoundCap = 2000000000000000000; // 2 ETH
-        } else if(now >= startICO + 14400 && now < startICO + 86400) { // следующие 20 часов
+        }
+        else if(now >= startICO + 14400 && now < startICO + 86400) { // следующие 20 часов
+
             individualRoundCap = 10000000000000000000; // 10 ETH
-        } else if(now >= startICO + 86400 && now < endICO) { // следующие 6 дней
+        }
+        else if(now >= startICO + 86400 && now < endICO) { // следующие 6 дней
+
             individualRoundCap = hardCap; //1400 ETH
-        } else { // далее
+        }
+        else { // далее
+
             revert();
         }
     }
 }
-//
