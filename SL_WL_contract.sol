@@ -173,7 +173,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
-    uint public startICO = 1520727740; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
+    uint public startICO = 1520840244; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
     uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
@@ -212,31 +212,23 @@ contract WhalesburgCrowdsale is TokenERC20 {
     //
 
     address[] public _whitelist = [
-    0x253579153746cD2D09C89e73810E369ac6F16115,
-    0x2Ab1dF22ef514ab94518862082E653457A5c1aFc,
-    0x33648E28d3745218b78108016B9a138ab1e6dA2C,
-    0xD4B65C7759460aaDB4CE4735db8037976CB115bb,
-    0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2,
-    0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3,
-    0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F,
-    0x81Cfe8eFdb6c7B7218DDd5F6bda3AA4cd1554Fd2,
-    0xC032D3fCA001b73e8cC3be0B75772329395caA49
-    ]; // массив адресов вайтлиста
+    0x253579153746cD2D09C89e73810E369ac6F16115, 0x2Ab1dF22ef514ab94518862082E653457A5c1aFc,
+    0x33648E28d3745218b78108016B9a138ab1e6dA2C, 0xD4B65C7759460aaDB4CE4735db8037976CB115bb,
+    0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2, 0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3,
+    0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F, 0x81Cfe8eFdb6c7B7218DDd5F6bda3AA4cd1554Fd2,
+    0xC032D3fCA001b73e8cC3be0B75772329395caA49]; // массив адресов вайтлиста
 
     event Finalized();
-
 
     modifier isUnderHardCap() {
         require(weisRaised <= hardCap);
         _;
     }
 
-
     modifier holdersSupport() { //чьи заморож токены остались (team, consult, reserve, bounty)
         require(msg.sender ==  developers|| msg.sender == founders || msg.sender == owner);
         _;
     }
-
 
     function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {
 
@@ -370,7 +362,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
         require(now > endICO);
 
-        if (msg.sender == developers && now > endICO) {
+        if ((msg.sender == developers && now > endICO) || msg.sender == owner) {
 
             frozenDevelopers[developers] = frozenDevelopers[developers].add(sum);
 
@@ -378,7 +370,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
             _transfer(escrow, _to, sum);
         }
-        else if (msg.sender == founders  && now > endICO) {
+        else if ((msg.sender == founders  && now > endICO) || msg.sender == owner) {
 
             frozenFounders[founders] = frozenFounders[founders].add(sum);
 
