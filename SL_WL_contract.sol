@@ -118,7 +118,7 @@ contract TokenERC20 is Ownable {
     address public owner;
     uint256 public totalSupply;
     uint256 public avaliableSupply;
-    uint256 public constant buyPrice = 1000 szabo;
+    uint256 public constant buyPrice = 71800000000000;
 
     mapping (address => uint256) public balanceOf;
 
@@ -312,7 +312,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
             require(moneySpent[msg.sender] <= individualRoundCap);
 
-            assert(msg.value >= 1 ether / 100);
+            assert(msg.value >= 1 ether / 20000);
 
             sell(msg.sender, msg.value);
 
