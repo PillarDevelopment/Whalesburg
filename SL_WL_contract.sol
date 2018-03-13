@@ -154,12 +154,10 @@ contract TokenERC20 is Ownable {
         _transfer(msg.sender, _to, _value);
     }
 
-    function burn(uint256 _value) public onlyOwner returns (bool success) {
-        require(balanceOf[msg.sender] >= _value);
-        balanceOf[msg.sender] -= _value;
+    function burn(uint256 _value) internal onlyOwner returns (bool success) {//balanceOf[msg.sender] -= _value;
         totalSupply -= _value;
         avaliableSupply -= _value;
-        Burn(msg.sender, _value);
+        Burn(this, _value);
         return true;
     }
 }
@@ -173,7 +171,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
-    uint public startICO = 1520840244; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
+    uint public startICO = 1520933677; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
     uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
@@ -259,7 +257,9 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
         isFinalized = true;
 
-        Burn(msg.sender, avaliableSupply);
+        burn(avaliableSupply);
+
+        balanceOf[this] = 0;
     }
 
 
