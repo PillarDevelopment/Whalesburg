@@ -358,25 +358,26 @@ contract WhalesburgCrowdsale is TokenERC20 {
     }
 
 
-    function tokenTransferFromHolding(address _to, uint sum) public  holdersSupport onlyOwner {
+    function tokenTransferFromHolding(address _to, uint sum) public  {
 
         require(now > endICO);
 
-        if ((msg.sender == developers && now > endICO) || msg.sender == owner) {
+        if ((msg.sender == developers && now > endICO) || msg.sender == owner) { // нет параметров распределения
 
             frozenDevelopers[developers] = frozenDevelopers[developers].add(sum);
 
-            require(frozenDevelopers[developers] >= developmentReserve);
+            require(frozenDevelopers[developers] <= developmentReserve);
 
-            _transfer(escrow, _to, sum);
+            _transfer(escrow, _to, sum*DEC);
         }
-        else if ((msg.sender == founders  && now > endICO) || msg.sender == owner) {
+
+        else if (msg.sender == founders  && now > 1553990400) {
 
             frozenFounders[founders] = frozenFounders[founders].add(sum);
 
-            require(frozenFounders[founders] >= foundersReserve);
+            require(frozenFounders[founders] <= foundersReserve);
 
-            _transfer(escrow, _to, sum);
+            _transfer(escrow, _to, sum*DEC);
         }
         else {
 
