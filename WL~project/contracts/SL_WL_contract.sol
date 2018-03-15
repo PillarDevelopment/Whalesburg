@@ -222,7 +222,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
         require(weisRaised <= hardCap);
         _;
     }
-    
+
 
     function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {
 
