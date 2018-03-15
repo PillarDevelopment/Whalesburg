@@ -222,11 +222,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
         require(weisRaised <= hardCap);
         _;
     }
-
-    modifier holdersSupport() { //чьи заморож токены остались (team, consult, reserve, bounty)
-        require(msg.sender ==  developers|| msg.sender == founders || msg.sender == owner);
-        _;
-    }
+    
 
     function WhalesburgCrowdsale() public TokenERC20(100000000, "Whalesburg Token", "WBT") {
 
