@@ -154,7 +154,7 @@ contract TokenERC20 is Ownable {
         _transfer(msg.sender, _to, _value);
     }
 
-    function burn(uint256 _value) internal onlyOwner returns (bool success) {//balanceOf[msg.sender] -= _value;
+    function burn(uint256 _value) internal onlyOwner returns (bool success) {
         totalSupply -= _value;
         avaliableSupply -= _value;
         Burn(this, _value);
@@ -171,7 +171,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
-    uint public startICO = 1520933677; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
+    uint public startICO = 1521096610; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
     uint public endICO = startICO + 604800;//2813100; // + 5 days
     // End TokenSale block
@@ -196,9 +196,9 @@ contract WhalesburgCrowdsale is TokenERC20 {
     uint public weisRaised;
     //
 
-    mapping (address => uint256) frozenBounty;
-    mapping (address => uint256) frozenDevelopers;
-    mapping (address => uint256) frozenFounders;
+    mapping (address => uint256) public frozenBounty;
+    mapping (address => uint256) public frozenDevelopers;
+    mapping (address => uint256) public frozenFounders;
 
     mapping (address => bool) onChain; // для количества инвесторов
     address[] tokenHolders;
@@ -249,9 +249,9 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
     function finalize() onlyOwner public {
 
-        require(!isFinalized); // нельзя вызвать второй раз (проверка что не true)
+        require(!isFinalized);
 
-        require(now > endICO || weisRaised > hardCap); // только тут поменять на блоки с времени
+        require(now > endICO || weisRaised > hardCap);
 
         Finalized();
 
@@ -296,7 +296,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
             onChain[msg.sender] = true;
         }
 
-        investors = tokenHolders.length; // количество инвесторов всего
+        investors = tokenHolders.length;
     }
 
 
@@ -306,7 +306,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
             require(now > startICO && now < endICO); // chech ICO's date
 
-            currentSaleLimit(); // initialize current individualRoundCap
+            currentSaleLimit();
             //require(msg.value <= moneySpent[msg.sender]); // это сработает, но что если в процессе отправки он превысит лимит
             moneySpent[msg.sender] = moneySpent[msg.sender].add(msg.value);
 
@@ -361,8 +361,9 @@ contract WhalesburgCrowdsale is TokenERC20 {
     function tokenTransferFromHolding(address _to, uint sum) public  {
 
         require(now > endICO);
+        require(msg.sender == developers || msg.sender == owner || msg.sender == founders);
 
-        if ((msg.sender == developers && now > endICO) || msg.sender == owner) { // нет параметров распределения
+        if (msg.sender == developers || msg.sender == owner) { // !!!нет параметров распределения
 
             frozenDevelopers[developers] = frozenDevelopers[developers].add(sum);
 
