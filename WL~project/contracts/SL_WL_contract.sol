@@ -57,22 +57,12 @@ contract StandartToken is Ownable {
     address public owner;
     uint256 public totalSupply;
     uint256 public avaliableSupply;
-    uint public buyPrice = 1000000000000000000;
-    bool public mintingFinished = false;
-    mapping(address => uint256) balances;
+    uint public buyPrice = 800000000000000;
 
     mapping (address => uint256) public balanceOf;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Burn(address indexed from, uint256 value);
-    event Mint(address indexed to, uint256 amount);
-    event MintFinished();
-
-    modifier canMint() {
-        require(!mintingFinished);
-        _;
-    }
-
 
     function StandartToken(
         uint256 initialSupply,
@@ -95,7 +85,7 @@ contract StandartToken is Ownable {
         uint previousBalances = balanceOf[_from] + balanceOf[_to];
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
-        Transfer(_from, _to, _value);
+        emit Transfer(_from, _to, _value);
         assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
     }
 
@@ -106,21 +96,7 @@ contract StandartToken is Ownable {
     function burn(uint256 _value) internal onlyOwner returns (bool success) {
         totalSupply -= _value;
         avaliableSupply -= _value;
-        Burn(this, _value);
-        return true;
-    }
-
-    function mint(address _to, uint256 _amount) onlyOwner canMint public returns (bool) {
-        totalSupply = totalSupply.add(_amount);
-        balances[_to] = balances[_to].add(_amount);
-        Mint(_to, _amount);
-        Transfer(address(0), _to, _amount);
-        return true;
-    }
-
-    function finishMinting() onlyOwner canMint public returns (bool) {
-        mintingFinished = true;
-        MintFinished();
+        emit Burn(this, _value);
         return true;
     }
 }
@@ -156,26 +132,28 @@ contract MainSale is StandartToken{
     uint public bonusSum;
     bool public isFinalized = false;
 
+    bool public mintingFinished = false;
+    mapping(address => uint256) balances;
     //event Finalized();
 
+    event Mint(address indexed to, uint256 amount);
+    event MintFinished();
 
+    modifier canMint() {
+        require(!mintingFinished);
+        _;
+    }
 
     function MainSale() public StandartToken(100000000000000000000000000, "Noize-MC", "MC"){
         distributionTokens();
     }
 
     function distributionTokens() internal {
-        //require(!distribute);
         _transfer(this, bounty, bountyReserve);
         _transfer(this, founders, foundersReserve);
         _transfer(this, reserve, reserveFund);
-        avaliableSupply -= 70000000000000000000000000;
-
-        //distribute = true;
+        avaliableSupply -= 30000000000000000000000000;
     }
-    // отправка эфира с контракта
-
-
 
     //изменение даты начала ICO
     function setStartIco(uint64 newStartIco) public onlyOwner {
@@ -270,23 +248,30 @@ contract MainSale is StandartToken{
     function finalize() onlyOwner public {
 
         require(!isFinalized);
-
         require(now > endIco || weisRaised > hardCap);
-
         //Finalized();
-
         isFinalized = true;
-
         burn(avaliableSupply);
-
         balanceOf[this] = 0;
     }
 
-    function transferEthFromContract(address _to, uint256 amount) public onlyOwner
-    {
+    function mint(address _to, uint256 _amount) onlyOwner canMint public returns (bool) {
+        require(now > endIco);
+        totalSupply = totalSupply.add(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        emit Mint(_to, _amount);
+        emit Transfer(address(0), _to, _amount);
+        return true;
+    }
+
+    function transferEthFromContract(address _to, uint256 amount) public onlyOwner {
         //amount = amount;
         _to.transfer(amount);
     }
 
-
+    function finishMinting() onlyOwner canMint public returns (bool) {
+        mintingFinished = true;
+        emit MintFinished();
+        return true;
+    }
 }
