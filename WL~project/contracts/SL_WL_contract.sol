@@ -287,4 +287,6 @@ contract MainSale is StandartToken{
         //amount = amount;
         _to.transfer(amount);
     }
+
+
 }
