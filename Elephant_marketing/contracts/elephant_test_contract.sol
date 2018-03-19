@@ -102,7 +102,7 @@ contract TokenERC20 is Ownable {
         uint previousBalances = balanceOf[_from] + balanceOf[_to];
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
-        Transfer(_from, _to, _value);
+        emit Transfer(_from, _to, _value);
         assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
     }
     function transfer(address _to, uint256 _value) public {
@@ -113,7 +113,7 @@ contract TokenERC20 is Ownable {
         balanceOf[msg.sender] -= _value;            // Subtract from the sender
         totalSupply -= _value;                      // Updates totalSupply
         avaliableSupply -= _value;
-        Burn(msg.sender, _value);
+        emit Burn(msg.sender, _value);
         return true;
     }
 }
@@ -232,10 +232,10 @@ contract ElephantCrowdsale is TokenERC20 {
         require(now > endICO);
 
         finalization();
-        Finalized();
+        emit Finalized();
 
         isFinalized = true;
-        Burn(msg.sender, avaliableSupply);
+        emit Burn(msg.sender, avaliableSupply);
     }
 
     function finalization() internal pure {
