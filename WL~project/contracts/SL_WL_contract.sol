@@ -59,6 +59,7 @@ contract StandartToken is Ownable {
     uint256 public avaliableSupply;
     uint public buyPrice = 1000000000000000000;
     bool public mintingFinished = false;
+    mapping(address => uint256) balances;
 
     mapping (address => uint256) public balanceOf;
 
