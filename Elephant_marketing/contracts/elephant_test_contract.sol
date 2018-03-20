@@ -79,7 +79,7 @@ contract TokenERC20 is Ownable {
 
     mapping (address => uint256) public balanceOf;
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    //event Transfer(address indexed from, address indexed to, uint256 value);
     event Burn(address indexed from, uint256 value);
 
     function TokenERC20(
@@ -102,7 +102,7 @@ contract TokenERC20 is Ownable {
         uint previousBalances = balanceOf[_from] + balanceOf[_to];
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
-        emit Transfer(_from, _to, _value);
+        //emit Transfer(_from, _to, _value);
         assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
     }
     function transfer(address _to, uint256 _value) public {
@@ -126,8 +126,8 @@ contract ElephantCrowdsale is TokenERC20 {
 
     address public multisig = 0xC032D3fCA001b73e8cC3be0B75772329395caA49;  //  !!!! TEST ADDRESS
     address public escrow = 0x0cdb839B52404d49417C8Ded6c3E2157A06CdD37;  //  !!!! TEST ADDRESS
-    uint public startICO = 1520243466; // now
-    uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
+    uint public startICO = 1521521700; // now
+    uint public endICO = endICO+86400; //
     // Supply for team and developers
     uint256 constant teamReserve = 20000000; //15 000 000
     // Supply for advisers, consultants and other
@@ -162,10 +162,10 @@ contract ElephantCrowdsale is TokenERC20 {
     function discountDate(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
         // address added in whileList
-        if (whitelist[wlCandidate] = true && now > startICO + 300 ) {
+        if (whitelist[wlCandidate] = true && now > startICO && now < startICO+300 ) {
             _amount = _amount.add(withDiscount(_amount, 20));
             // all proved 15%
-        } else if (now > startICO + 600 && now < startICO + 1200) {
+        } else if (now > startICO + 300 && now < startICO + 1200) {
             _amount = _amount.add(withDiscount(_amount, 15));
             // all proved 10%
         } else if (now > startICO + 1200 && now < startICO + 1800) {
@@ -281,7 +281,7 @@ contract ElephantCrowdsale is TokenERC20 {
             _transfer(this, _investor, _amount);
         } else { // ничего =  revert
             _amount = withDiscount(_amount, 0);
-            revert();
+            _transfer(this, _investor, _amount);
         }
         avaliableSupply -= _amount;
     }
