@@ -79,7 +79,7 @@ contract TokenERC20 is Ownable {
 
     mapping (address => uint256) public balanceOf;
 
-    //event Transfer(address indexed from, address indexed to, uint256 value);
+    event Transfer(address indexed from, address indexed to, uint256 value);
     event Burn(address indexed from, uint256 value);
 
     function TokenERC20(
@@ -102,7 +102,7 @@ contract TokenERC20 is Ownable {
         uint previousBalances = balanceOf[_from] + balanceOf[_to];
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
-        //emit Transfer(_from, _to, _value);
+        Transfer(_from, _to, _value);
         assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
     }
     function transfer(address _to, uint256 _value) public {
@@ -113,7 +113,7 @@ contract TokenERC20 is Ownable {
         balanceOf[msg.sender] -= _value;            // Subtract from the sender
         totalSupply -= _value;                      // Updates totalSupply
         avaliableSupply -= _value;
-        emit Burn(msg.sender, _value);
+        Burn(msg.sender, _value);
         return true;
     }
 }
@@ -126,8 +126,8 @@ contract ElephantCrowdsale is TokenERC20 {
 
     address public multisig = 0xC032D3fCA001b73e8cC3be0B75772329395caA49;  //  !!!! TEST ADDRESS
     address public escrow = 0x0cdb839B52404d49417C8Ded6c3E2157A06CdD37;  //  !!!! TEST ADDRESS
-    uint public startICO = 1521521700; // now
-    uint public endICO = endICO+86400; //
+    uint public startICO = 1520243466; // now
+    uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
     // Supply for team and developers
     uint256 constant teamReserve = 20000000; //15 000 000
     // Supply for advisers, consultants and other
@@ -162,10 +162,10 @@ contract ElephantCrowdsale is TokenERC20 {
     function discountDate(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(DEC).div(buyPrice);
         // address added in whileList
-        if (whitelist[wlCandidate] = true && now > startICO && now < startICO+300 ) {
+        if (whitelist[wlCandidate] = true && now > startICO + 300 ) {
             _amount = _amount.add(withDiscount(_amount, 20));
             // all proved 15%
-        } else if (now > startICO + 300 && now < startICO + 1200) {
+        } else if (now > startICO + 600 && now < startICO + 1200) {
             _amount = _amount.add(withDiscount(_amount, 15));
             // all proved 10%
         } else if (now > startICO + 1200 && now < startICO + 1800) {
@@ -232,10 +232,10 @@ contract ElephantCrowdsale is TokenERC20 {
         require(now > endICO);
 
         finalization();
-        emit Finalized();
+        Finalized();
 
         isFinalized = true;
-        emit Burn(msg.sender, avaliableSupply);
+        Burn(msg.sender, avaliableSupply);
     }
 
     function finalization() internal pure {
@@ -281,28 +281,8 @@ contract ElephantCrowdsale is TokenERC20 {
             _transfer(this, _investor, _amount);
         } else { // ничего =  revert
             _amount = withDiscount(_amount, 0);
-            _transfer(this, _investor, _amount);
+            revert();
         }
         avaliableSupply -= _amount;
     }
 }
-
-/* рекомендации для контракта от аудитора
-Еще некоторые амечания по смарту, может поможет где-то)
-
-45: Тип uint8 вместо uint256
-74, 78, 149, 216, 255: Не используется SafeMath
-134: = true избыточно, т.к. обращение к маппингк и так возвращает булин
-148: >= вместо простого >, _amount вместо amount - т.к. это уже сконвертированное значение с учетом decimals, а avaliableSupply хранит сконвертированное значение
-159-160: Стоит поменять местами в угоду читабельности + в случае ошибки будет потрачено на строчку газа меньше)
-162: require(msg.data.length == 20) вместо if-else конструкции
-169, 172: Повторное чтение и запись в переменные, которые хранятся в Storage. Это очень дорого (50 газа за чтение + 5000 газа за запись). Вместо четырех таких обращений можно делать два, экономия - 10100 газа. Просто зачейнить методы SafeMath.
-177: То же, что и выше - две строчки, которые можно уместить в одну: avaliableSupply .sub(referalTokens+refererTokens)
-
-и по function discountSum
-
-делаем require() в начале (хотя в payable функции есть assert(), но пускай, на всякий случай)
-далее инициализируем локальную переменную в Memory, чтобы не обращаться постоянно в Storage-переменную, разница: 3 газа вместо 50, а обращений там может быть и два, и три, и четыре).
-Также нет смысла вызывать _transfer() в каждом условии, поэтому переносим его в конец. И используем SafeMath, конечно же)
-
- */
