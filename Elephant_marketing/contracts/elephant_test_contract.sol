@@ -99,10 +99,10 @@ contract TokenERC20 is Ownable {
         require(_to != 0x0);
         require(balanceOf[_from] >= _value);
         require(balanceOf[_to] + _value > balanceOf[_to]);
-        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        uint256 previousBalances = balanceOf[_from] + balanceOf[_to];
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
-        Transfer(_from, _to, _value);
+        emit Transfer(_from, _to, _value);
         assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
     }
     function transfer(address _to, uint256 _value) public {
@@ -113,7 +113,7 @@ contract TokenERC20 is Ownable {
         balanceOf[msg.sender] -= _value;            // Subtract from the sender
         totalSupply -= _value;                      // Updates totalSupply
         avaliableSupply -= _value;
-        Burn(msg.sender, _value);
+        emit Burn(msg.sender, _value);
         return true;
     }
 }
@@ -126,8 +126,8 @@ contract ElephantCrowdsale is TokenERC20 {
 
     address public multisig = 0xC032D3fCA001b73e8cC3be0B75772329395caA49;  //  !!!! TEST ADDRESS
     address public escrow = 0x0cdb839B52404d49417C8Ded6c3E2157A06CdD37;  //  !!!! TEST ADDRESS
-    uint public startICO = 1520243466; // now
-    uint public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
+    uint64 public startICO = 1520243466; // now
+    uint64 public endICO = 1520294399; // Monday, 05-Mar-18 23:59:59 UTC
     // Supply for team and developers
     uint256 constant teamReserve = 20000000; //15 000 000
     // Supply for advisers, consultants and other
@@ -142,12 +142,12 @@ contract ElephantCrowdsale is TokenERC20 {
     address team = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; //  !!!! TEST ADDRESS
     address promo = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; //  !!!! TEST ADDRESS//
     address wlCandidate;
-    uint public bonusSum;
-    uint refererTokens;
-    uint referalTokens;
+    uint256 public bonusSum;
+    uint256 refererTokens;
+    uint256 referalTokens;
 
     bool distribute = false;
-    uint public weisRaised;
+    uint256 public weisRaised;
     bool public isFinalized = false;
 
     event Finalized();
@@ -181,7 +181,7 @@ contract ElephantCrowdsale is TokenERC20 {
         _transfer(this, _investor, _amount);
     }
 
-    function withDiscount(uint256 _amount, uint _percent) internal pure returns (uint256) {
+    function withDiscount(uint256 _amount, uint256 _percent) internal pure returns (uint256) {
         return ((_amount * _percent) / 100);
     }
 
@@ -232,10 +232,10 @@ contract ElephantCrowdsale is TokenERC20 {
         require(now > endICO);
 
         finalization();
-        Finalized();
+        emit Finalized();
 
         isFinalized = true;
-        Burn(msg.sender, avaliableSupply);
+        emit Burn(msg.sender, avaliableSupply);
     }
 
     function finalization() internal pure {
