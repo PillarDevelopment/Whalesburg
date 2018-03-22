@@ -161,6 +161,8 @@ contract TokenERC20 is Ownable {
         return true;
     }
 }
+
+/*************************************************************************************************************/
 contract WhalesburgCrowdsale is TokenERC20 {
     using SafeMath for uint;
 
@@ -171,7 +173,7 @@ contract WhalesburgCrowdsale is TokenERC20 {
     address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
     address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
-    uint256 public startICO = 1521694755; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
+    uint256 public startICO = 1521704287; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
     // start TokenSale block
     uint256 public endICO = startICO + 604800;//2813100; // + 7 days
     // End TokenSale block
@@ -242,7 +244,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
         }
     }
 
-
     function finalize() onlyOwner public {
 
         require(!isFinalized);
@@ -258,7 +259,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
         balanceOf[this] = 0;
     }
 
-
     function distributionTokens() internal {
 
         require(!distribute);
@@ -273,7 +273,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
         distribute = true;
     }
-
 
     function sell(address _investor, uint256 amount) internal {
 
@@ -294,7 +293,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
 
         investors = tokenHolders.length;
     }
-
 
     function () isUnderHardCap public payable {
 
@@ -350,7 +348,6 @@ contract WhalesburgCrowdsale is TokenERC20 {
             revert();
         }
     }
-
 
     function tokenTransferFromHolding(address _to, uint256 sum) public  {
 
