@@ -29,24 +29,13 @@ totalSupply - показывает не правильно
 
 для web3.js
 balanseOf
-WeiRaised
-*/
-pragma solidity ^0.4.18;
-
+WeiRaised*/
+pragma solidity ^0.4.21;
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
-* @dev Source code hence -
-* https://github.com/PillarDevelopment/Barbarossa-Git/blob/master/contracts/BarbarossaInvestToken.sol
-*
 */
-/*********************************************************************************************************************
- * @title SafeMath
- * @dev Math operations with safety checks that throw on error
- */
 library SafeMath {
-    /**
-    * @dev Multiplies two numbers, throws on overflow.
-    */
+
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {
             return 0;
@@ -55,25 +44,19 @@ library SafeMath {
         assert(c / a == b);
         return c;
     }
-    /**
-    * @dev Integer division of two numbers, truncating the quotient.
-    */
+
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         // assert(b > 0); // Solidity automatically throws when dividing by 0
         uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return c;
     }
-    /**
-    * @dev Substracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
-    */
+
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         assert(b <= a);
         return a - b;
     }
-    /**
-    * @dev Adds two numbers, throws on overflow.
-    */
+
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         assert(c >= a);
@@ -86,23 +69,14 @@ interface ERC20 {
     function transferFromICO(address _to, uint256 _value) external returns(bool);
     function burn(address _to, uint256) external returns(bool);
 }
-/*********************************************************************************************************************
- * @title Ownable
- * @dev The Ownable contract has an owner address, and provides basic authorization control
- * functions, this simplifies the implementation of "user permissions".
- */
+
 contract Ownable {
     address public owner;
-    /**
-     * @dev The Ownable constructor sets the original `owner` of the contract to the sender
-     * account.
-     */
+
     function Ownable() public {
         owner = msg.sender;
     }
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
+
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
@@ -111,8 +85,6 @@ contract Ownable {
 /*********************************************************************************************************************
 * @dev see https://github.com/ethereum/EIPs/issues/20
 */
-
-
 /*************************************************************************************************************/
 contract WhalesburgCrowdsale is Ownable {
     using SafeMath for uint;
@@ -151,28 +123,23 @@ contract WhalesburgCrowdsale is Ownable {
     bool  distribute = false;
 
     uint256 public weisRaised;
-    //
-
-    mapping (address => uint256) frozenBounty;
-    mapping (address => uint256) frozenDevelopers;
-    mapping (address => uint256) frozenFounders;
-
+    //mapping (address => uint256) frozenBounty;
+    //mapping (address => uint256) frozenDevelopers;
+    //mapping (address => uint256) frozenFounders;
     mapping (address => bool) onChain; // для количества инвесторов
-    address[] tokenHolders;
-
     //whitelist of members
     mapping (address => bool) whitelist;
-    //
     mapping (address => uint256) public moneySpent;
-    //
 
-    address[] /*public*/ _whitelist = [
+    address[] tokenHolders;
+
+    /*    address[] public _whitelist = [
     0x253579153746cD2D09C89e73810E369ac6F16115, 0x2Ab1dF22ef514ab94518862082E653457A5c1aFc,
     0x33648E28d3745218b78108016B9a138ab1e6dA2C, 0xD4B65C7759460aaDB4CE4735db8037976CB115bb,
     0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2, 0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3,
     0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F, 0x81Cfe8eFdb6c7B7218DDd5F6bda3AA4cd1554Fd2,
     0xC032D3fCA001b73e8cC3be0B75772329395caA49]; // массив адресов вайтлиста
-
+    */
     event Finalized();
 
     modifier isUnderHardCap() {
@@ -180,109 +147,71 @@ contract WhalesburgCrowdsale is Ownable {
         _;
     }
 
-
     function WhalesburgCrowdsale() public  {
-
         //addWhiteList();
-
         //distributionTokens();
     }
 
     function setToken (ERC20 _token) public onlyOwner {
         token = _token;
     }
-
     // add address in whitelist
-    function addWhiteList() internal{
+    function addWhiteList(address _whitelist) public onlyOwner{
 
-        for (uint256 i=0; i<_whitelist.length; i++) {
-
-            whitelist[_whitelist[i]] = true;
-
-            membersWhiteList =_whitelist.length;
+        for (uint256 i=0; i<100; i++) {
+            whitelist[_whitelist] = true;
+            membersWhiteList++; // =_whitelist.length;
         }
     }
 
     function finalize() onlyOwner public {
-
         require(!isFinalized);
-
         require(now > endICO || weisRaised > hardCap);
-
         emit Finalized();
-
         isFinalized = true;
-
         //burn(avaliableSupply);
-
         //balanceOf[this] = 0;
     }
 
     function distributionTokens() internal {
-
         require(!distribute);
-
         token.transferFromICO(bounty, bountyReserve*1e18);
-
         token.transferFromICO(privateInvestors, privateSaleTokens*1e18);
-
         token.transferFromICO(escrow, (developmentReserve+foundersReserve)*1e18);
-
         //avaliableSupply -= 80200000*DEC;
-
         distribute = true;
     }
 
     function sell(address _investor, uint256 amount) internal {
-
         uint256 _amount = amount.mul(1e18).div(buyPrice);
-
         //require(amount > avaliableSupply);
-
         //avaliableSupply -= _amount;
-
         token.transferFromICO(_investor, _amount);
-
         if (!onChain[msg.sender]) {
-
             tokenHolders.push(msg.sender);
-
             onChain[msg.sender] = true;
         }
-
         investors = tokenHolders.length;
     }
 
     function () isUnderHardCap public payable {
-
         if(isWhitelisted(msg.sender)) { // verifacation that the sender is a member of WL
-
             require(now > startICO && now < endICO); // chech ICO's date
-
             currentSaleLimit();
-
             moneySpent[msg.sender] = moneySpent[msg.sender].add(msg.value);
-
             require(moneySpent[msg.sender] <= individualRoundCap);
-
             assert(msg.value >= 1 ether / 20000);
-
             sell(msg.sender, msg.value);
-
             weisRaised = weisRaised.add(msg.value);
-
             multisig.transfer(msg.value);
         } else {
-
             revert();
         }
     }
 
     function isWhitelisted(address who) public view returns(bool) {
-
         return whitelist[who];
     }
-
 
     function currentSaleLimit() internal {
 
@@ -303,42 +232,28 @@ contract WhalesburgCrowdsale is Ownable {
             individualRoundCap = hardCap; //1400 ETH
         }
         else {
-
             revert();
         }
     }
-
     /*
     function tokenTransferFromHolding(address _to, uint256 sum) public  {
-
         require(now > endICO);
         require(msg.sender == developers || msg.sender == owner || msg.sender == founders);
-
         if (msg.sender == developers || msg.sender == owner) { // !!!нет параметров распределения
-
             frozenDevelopers[developers] = frozenDevelopers[developers].add(sum);
-
             require(frozenDevelopers[developers] <= developmentReserve);
-
             //_transfer(escrow, _to, sum*DEC);
         }
-
         else if (msg.sender == founders  && now > 1553990400) {
-
             frozenFounders[founders] = frozenFounders[founders].add(sum);
-
             require(frozenFounders[founders] <= foundersReserve);
-
             //_transfer(escrow, _to, sum*DEC);
         }
         else {
-
             revert();
         }
     }
     */
-
-
     // функции сеттеры на период тестирования
     function testSetStaerDate(uint256 newStart) public onlyOwner {
         startICO = newStart;
