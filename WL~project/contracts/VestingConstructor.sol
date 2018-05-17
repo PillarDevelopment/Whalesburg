@@ -1,9 +1,12 @@
 pragma solidity ^0.4.23;
 
 import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/token/ERC20/TokenVesting.sol";
-//import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-contract DevPoolVesting {
+contract DevPoolVesting is Ownable {
+
+    using SafeMath for uint256;
     // 0x81cfe8efdb6c7b7218ddd5f6bda3aa4cd1554fd2, 1526411191, 43200, 86400, true
     TokenVesting public token;
 
@@ -12,6 +15,7 @@ contract DevPoolVesting {
     uint256 public third_volume_amount;
     uint256 unixDay = 86400;
     uint256 constant devPoolTokens = 21500000000000000000000000; // 21,500,000 WBT
+    bool _revocable = false;
 
     event CreateVesting(address spender, uint256 tokensAmount, address contractAddress);
 
@@ -20,23 +24,20 @@ contract DevPoolVesting {
         uint256 _second_volume_amount,
         uint256 _third_volume_amount
     ) public {
-        first_volume_amount = _first_volume_amount*unixDay;
-        second_volume_amount = _second_volume_amount*unixDay;
-        third_volume_amount = _third_volume_amount*unixDay;
+        first_volume_amount = _first_volume_amount.mul(unixDay);
+        second_volume_amount = _second_volume_amount.mul(unixDay);
+        third_volume_amount = _third_volume_amount.mul(unixDay);
     }
 
     function createVesting(
         address _beneficiary,
         uint256 _start,
-        uint256 _cliff,
-        uint256 _duration,
-        uint256 _tokensAmount,
-        bool _revocable
+        uint256 _tokensAmount
+
     ) public  {
         require(_tokensAmount >= devPoolTokens); // проверка что не превысили размер пула
-        _duration = first_volume_amount*second_volume_amount*third_volume_amount;
-        _revocable = false;
-        token = new TokenVesting(_beneficiary, _start, _cliff, _duration, _revocable);
+        uint256 _duration = third_volume_amount; //first_volume_amount.add(second_volume_amount).add(third_volume_amount);
+        token = new TokenVesting(_beneficiary, _start, first_volume_amount, /* second_volume_amount, third_volume_amount, */ _duration, _revocable);
         emit CreateVesting(_beneficiary, _tokensAmount, token);
     }
 }
@@ -53,7 +54,9 @@ constructor(first_volume_amount, second_volume_amount, third_volume_amount)
 build(amount, beneficiary, start, cliff, duration, revocable) onlyOwner
 Данный метод вызывет new https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/token/ERC20/TokenVesting.sol с соответствующими параметрами и пересылает туда указанное кол-во WBT.
 Как связаны параметры из constructor с этим методом?
-Нам нужно обеспечить гарантию того, что мы выпустим не больше токенов из Development пула, чем мы обещали в Whitepaper до полного их unlock-a. Собственно, для этого и нужны параметры в constructor. Связь идет через cliff & duration параметры: cliff должен быть не меньше времени, которое осталось до первой обещанной разблокировки. Общая сумма токенов, на контрактах соответствующих определенному периоду лока не должна превышать соответствующий лимит из конструктора.
+Нам нужно обеспечить гарантию того, что мы выпустим не больше токенов из Development пула, чем мы обещали в Whitepaper до полного их unlock-a. Собственно, для этого и нужны параметры в constructor.
+Связь идет через cliff & duration параметры:  cliff должен быть не меньше времени, которое осталось до первой обещанной разблокировки.
+Общая сумма токенов, на контрактах соответствующих определенному периоду лока не должна превышать соответствующий лимит из конструктора.
 
 Пример 1:
 1. Создаем Factory: f = new (1mln WBT, 4mln WBT, 15.5mln WBT)
