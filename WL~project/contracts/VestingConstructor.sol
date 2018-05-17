@@ -3,41 +3,45 @@ pragma solidity ^0.4.23;
 import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/token/ERC20/TokenVesting.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 contract DevPoolVesting is Ownable {
 
     using SafeMath for uint256;
+
     // 0x81cfe8efdb6c7b7218ddd5f6bda3aa4cd1554fd2, 1526411191, 43200, 86400, true
     TokenVesting public token;
 
-    uint256 public first_volume_amount;
-    uint256 public second_volume_amount;
-    uint256 public third_volume_amount;
+    //uint256 public first_volume_amount;
+    //uint256 public second_volume_amount;
+    //uint256 public third_volume_amount;
     uint256 unixDay = 86400;
-    uint256 constant devPoolTokens = 21500000000000000000000000; // 21,500,000 WBT
+    uint256 public devPoolTokens = 21500000000000000000000000; // 21,500,000 WBT
     bool _revocable = false;
 
     event CreateVesting(address spender, uint256 tokensAmount, address contractAddress);
 
     constructor(
-        uint256 _first_volume_amount,
-        uint256 _second_volume_amount,
-        uint256 _third_volume_amount
+    //uint256 _first_volume_amount, //uint256 _second_volume_amount, //uint256 _third_volume_amount
     ) public {
-        first_volume_amount = _first_volume_amount.mul(unixDay);
-        second_volume_amount = _second_volume_amount.mul(unixDay);
-        third_volume_amount = _third_volume_amount.mul(unixDay);
+        //first_volume_amount = _first_volume_amount.mul(unixDay); //second_volume_amount = _second_volume_amount.mul(unixDay);
+        //third_volume_amount = _third_volume_amount.mul(unixDay);
     }
 
     function createVesting(
         address _beneficiary,
         uint256 _start,
+        uint256 _duration,
+        uint256 _cliff,
         uint256 _tokensAmount
-
     ) public  {
-        require(_tokensAmount >= devPoolTokens); // проверка что не превысили размер пула
-        uint256 _duration = third_volume_amount; //first_volume_amount.add(second_volume_amount).add(third_volume_amount);
-        token = new TokenVesting(_beneficiary, _start, first_volume_amount, /* second_volume_amount, third_volume_amount, */ _duration, _revocable);
+        _cliff = _cliff.mul(unixDay);
+        require(_tokensAmount <= devPoolTokens); // проверка что не превысили размер пула
+        //uint256 _duration = third_volume_amount; //first_volume_amount.add(second_volume_amount).add(third_volume_amount);
+        token = new TokenVesting(_beneficiary, _start, _cliff, _duration, _revocable);
+        //token.safeTransfer(this, _beneficiary, _tokensAmount);
+        //token.safeTransfer(beneficiary, _tokensAmount);
+        devPoolTokens = devPoolTokens.sub(_tokensAmount);
         emit CreateVesting(_beneficiary, _tokensAmount, token);
     }
 }
