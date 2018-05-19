@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.23;
 
 library SafeMath {
 
@@ -35,7 +35,7 @@ contract Ownable {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    function Ownable() public {
+    constructor () public {
         owner = msg.sender;
     }
 
@@ -177,38 +177,12 @@ contract BurnableToken is BasicToken, Ownable {
     }
 }
 
-contract MintableToken is StandardToken, Ownable {
-    event Mint(address indexed to, uint256 amount);
-    event MintFinished();
-
-    bool public mintingFinished = false;
-
-    modifier canMint() {
-        require(!mintingFinished);
-        _;
-    }
-
-    function mint(address _to, uint256 _amount) onlyOwner canMint public returns (bool) {
-        totalSupply_ = totalSupply_.add(_amount);
-        balances[_to] = balances[_to].add(_amount);
-        emit Mint(_to, _amount);
-        emit Transfer(address(0), _to, _amount);
-        return true;
-    }
-
-    function finishMinting() onlyOwner canMint public returns (bool) {
-        mintingFinished = true;
-        emit MintFinished();
-        return true;
-    }
-}
-
-contract WhalesburgToken is MintableToken, BurnableToken, Pausable {
+contract WhalesburgToken is StandardToken, BurnableToken, Pausable {
 
     using SafeMath for uint256;
 
-    string  public name = "talantico";
-    string  public symbol = "TLN";
+    string  public name = "WhalesburgToken";
+    string  public symbol = "WSR";
     uint256 constant public decimals = 18;
     uint256 constant dec = 10**decimals;
     uint256 public initialSupply = 100000000*dec;
@@ -220,7 +194,7 @@ contract WhalesburgToken is MintableToken, BurnableToken, Pausable {
         _;
     }
 
-    function WhalesburgToken( ) public {
+    constructor ( ) public {
         totalSupply_ = totalSupply_.add(initialSupply);
         balances[owner] = balances[owner].add(initialSupply);
         availableSupply = totalSupply_;
