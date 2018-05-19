@@ -23,9 +23,9 @@ contract TokenVesting is Ownable {
     uint256 public start;
     uint256 public duration = 31536000; // 1 year
 
-    uint256 constant first_volume_amount = 1000000000000000000000000; // 1,000,000 WBT
-    uint256 constant second_volume_amount = 4000000000000000000000000; // 4,000,000 WBT
-    uint256 constant third_volume_amount = 15500000000000000000000000; // 15,500,000 WBT
+    //uint256 constant first_volume_amount = 1000000000000000000000000; // 1,000,000 WBT
+    //uint256 constant second_volume_amount = 4000000000000000000000000; // 4,000,000 WBT
+    //uint256 constant third_volume_amount = 15500000000000000000000000; // 15,500,000 WBT
 
     bool public revocable = true;
 
@@ -35,10 +35,11 @@ contract TokenVesting is Ownable {
     constructor(  // 0xC032D3fCA001b73e8cC3be0B75772329395caA49, 1526461102, 600, 1200, true
         address _beneficiary,
         uint256 _start,
-    //uint256 _cliff1, // 3 mounth
-    //uint256 _cliff2, // 6 mouth
-    //uint256 _cliff3, // 12 mounth
-    //uint256 _duration,
+        uint256 _cliff1, // 3 mounth
+        uint256 _cliff2, // 6 mouth
+        uint256 _cliff3, // 12 mounth
+        uint256 _duration,
+        uint256 _tokensAmount,
         bool _revocable)
     public
     {
@@ -52,41 +53,6 @@ contract TokenVesting is Ownable {
         //cliff3 = start.add(_cliff3);
         start = _start;
     }
-
-    /*
-    function createVesting(
-        //address _token,
-        //address _vester,
-        uint256 _vestedAmount,
-        //uint64 _startTime,
-        //uint64 _grantPeriod,
-        uint64 _cliffPeriod)
-        external
-    {
-        require(_token != 0);
-        require(_vester != 0);
-        require(_cliffPeriod <= _grantPeriod);
-        require(_vestedAmount != 0);
-        require(_grantPeriod==0 || _vestedAmount * _grantPeriod >= _vestedAmount); // no overflow allow here! (to make getBalanceVestingInternal safe).
-
-        // verify that there is not already a grant between the addresses for this specific contract.
-        require(grantPerTokenGranterVester[_token][msg.sender][_vester].vestedAmount==0);
-
-        var cliffTime = _startTime.add(_cliffPeriod);
-        var endTime = _startTime.add(_grantPeriod);
-
-        grantPerTokenGranterVester[_token][msg.sender][_vester] = Grant(_vestedAmount, _startTime, cliffTime, endTime, 0);
-
-        // update the balance
-        balancePerPersonPerToken[_token][msg.sender] = balancePerPersonPerToken[_token][msg.sender].sub(_vestedAmount);
-
-        emit NewGrant(msg.sender, _vester, _token, _vestedAmount, _startTime, cliffTime, endTime);
-    }
-    */
-
-
-
-
 
     /* @notice отправка vested tokens бенефициару*/
     function release(ERC20Basic token) public {
