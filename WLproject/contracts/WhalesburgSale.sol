@@ -30,6 +30,7 @@ totalSupply - показывает не правильно
 для web3.js
 balanseOf
 WeiRaised*/
+
 pragma solidity ^0.4.21;
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
@@ -73,7 +74,7 @@ interface ERC20 {
 contract Ownable {
     address public owner;
 
-    function Ownable() public {
+    constructor() public {
         owner = msg.sender;
     }
 
@@ -147,7 +148,7 @@ contract WhalesburgCrowdsale is Ownable {
         _;
     }
 
-    function WhalesburgCrowdsale() public  {
+    constructor() public  {
         //addWhiteList();
         //distributionTokens();
     }
