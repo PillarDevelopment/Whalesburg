@@ -172,7 +172,11 @@ contract WhalesburgCrowdsale is Ownable {
         membersWhiteList++;
         emit Authorized(_beneficiary, now);
     }
-
+    /**
+    * @dev Example: ["0x253579153746cD2D09C89e73810E369ac6F16115", "0x2Ab1dF22ef514ab94518862082E653457A5c1aFc", "0x33648E28d3745218b78108016B9a138ab1e6dA2C", "0xD4B65C7759460aaDB4CE4735db8037976CB115bb",
+    "0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2", "0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3", "0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F",
+    "0xC032D3fCA001b73e8cC3be0B75772329395caA49"]
+    **/
     function addManyAuthorizeToWhitelist(address[] _beneficiaries) public onlyOwner {
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
             whitelist[_beneficiaries[i]] = true;
