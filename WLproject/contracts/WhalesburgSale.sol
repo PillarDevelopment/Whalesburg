@@ -1,25 +1,7 @@
 /*
-totalSupply - показывает не правильно
-
 - сделать паблик меппинг чтобы каждый по своему адресу увидел свой лимит - или доступный лимит
-
-(+)     нет софт капа
-(+)     скидок нет
-
 (+)     проданные токены на пресейл
-
-(+)     - ефир отправляется на мультисиг
-(+)     - убрать оракул - сколько стоит доллар - была првязка к доллару
-
-лучше сделать несколькими контрактами из за WhiteList
-
-сроки - 8-9 марта - на аудит
-тестирование ganashe
-
-В контракте Crowdsale:
-
 (+)     function maxDayLimit (для ежедневного капа максимальной покупки) - 20 часов
-(+)      payable
 (+)     WhiteList - инвестор из данного списка участвует в ICO() - 10 часов
 (+)      проверка на наличие н=инвестора в WhiteList  в payable
 (+)     - tokenTransferFromHolding - для отправки токенов со счета escrow
@@ -44,9 +26,7 @@ library SafeMath {
     }
 
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        // assert(b > 0); // Solidity automatically throws when dividing by 0
         uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return c;
     }
 
@@ -65,7 +45,8 @@ library SafeMath {
 interface ERC20 {
     function transfer (address _beneficiary, uint256 _tokenAmount) external returns (bool);
     function transferFromICO(address _to, uint256 _value) external returns(bool);
-    //function burn(address _to, uint256) external returns(bool);
+    function burn(address _who, uint256 _value) external returns(bool);
+    function balanceOf(address who) external returns (uint256);
 }
 
 contract Ownable {
@@ -81,8 +62,7 @@ contract Ownable {
     }
 }
 /*********************************************************************************************************************
-* @dev see https://github.com/ethereum/EIPs/issues/20
-*/
+* @dev see https://github.com/ethereum/EIPs/issues/20 */
 /*************************************************************************************************************/
 contract WhalesburgCrowdsale is Ownable {
     using SafeMath for uint;
@@ -129,13 +109,6 @@ contract WhalesburgCrowdsale is Ownable {
 
     address[] tokenHolders;
 
-    /*    address[] public _whitelist = [
-    0x253579153746cD2D09C89e73810E369ac6F16115, 0x2Ab1dF22ef514ab94518862082E653457A5c1aFc,
-    0x33648E28d3745218b78108016B9a138ab1e6dA2C, 0xD4B65C7759460aaDB4CE4735db8037976CB115bb,
-    0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2, 0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3,
-    0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F, 0x81Cfe8eFdb6c7B7218DDd5F6bda3AA4cd1554Fd2,
-    0xC032D3fCA001b73e8cC3be0B75772329395caA49]; // массив адресов вайтлиста
-    */
     event Finalized();
     event Authorized(address wlCandidate, uint timestamp);
     event Revoked(address wlCandidate, uint timestamp);
@@ -200,6 +173,7 @@ contract WhalesburgCrowdsale is Ownable {
         require(now > endICO || weisRaised > hardCap);
         emit Finalized();
         isFinalized = true;
+        token.burn(this, token.balanceOf(this));
     }
 
     /***************************--Payable --*********************************************/
