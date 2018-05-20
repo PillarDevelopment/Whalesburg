@@ -26,12 +26,9 @@ totalSupply - показывает не правильно
 (+)     - сжигание нераспределеннх токенов -
 (+)     - finalize - complete
 (+)     - харкап в 3800 eth complete
+*/
 
-для web3.js
-balanseOf
-WeiRaised*/
-
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.23;
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
 */
@@ -68,7 +65,7 @@ library SafeMath {
 interface ERC20 {
     function transfer (address _beneficiary, uint256 _tokenAmount) external returns (bool);
     function transferFromICO(address _to, uint256 _value) external returns(bool);
-    function burn(address _to, uint256) external returns(bool);
+    //function burn(address _to, uint256) external returns(bool);
 }
 
 contract Ownable {
@@ -97,25 +94,26 @@ contract WhalesburgCrowdsale is Ownable {
     address  bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
     address  privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
     address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
-    address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
+    //address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
-    uint256 public startICO = 1521704287; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
-    // start TokenSale block
+    uint256 public startICO = now; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
+
     uint256 public endICO = startICO + 604800;//2813100; // + 7 days
-    // End TokenSale block
-    uint256  privateSaleTokens = 46200000;
-    // tokens for participants preICO
-    uint256  foundersReserve = 10000000;
-    // frozen tokens for Founders
-    uint256  developmentReserve = 20500000;
-    // frozen tokens for Founders
-    uint256  bountyReserve = 3500000;
-    // tokes for bounty program
-    uint256 public individualRoundCap; // от номера
-    // variable for
-    uint256 public hardCap = 1421640000000000000000;
-    // 1421.64 ether
+
+    uint256  privateSaleTokens = 46200000;     // tokens for participants preICO
+
+    uint256  foundersReserve = 10000000; // frozen tokens for Founders
+
+    uint256  developmentReserve = 20500000; // address for vestingContracts
+
+    uint256  bountyReserve = 3500000; // tokes for bounty program
+
+    uint256 public individualRoundCap; // от номера  // variable for
+
+    uint256 public hardCap = 1421640000000000000000; // 1421.64 ether
+
     uint256 public investors; // количество инвесторов проекта
+
     uint256 public membersWhiteList;
 
     uint256 public buyPrice = 10000000000000000000;
@@ -124,11 +122,8 @@ contract WhalesburgCrowdsale is Ownable {
     bool  distribute = false;
 
     uint256 public weisRaised;
-    //mapping (address => uint256) frozenBounty;
-    //mapping (address => uint256) frozenDevelopers;
-    //mapping (address => uint256) frozenFounders;
+
     mapping (address => bool) onChain; // для количества инвесторов
-    //whitelist of members
     mapping (address => bool) whitelist;
     mapping (address => uint256) public moneySpent;
 
@@ -142,27 +137,58 @@ contract WhalesburgCrowdsale is Ownable {
     0xC032D3fCA001b73e8cC3be0B75772329395caA49]; // массив адресов вайтлиста
     */
     event Finalized();
+    event Authorized(address wlCandidate, uint timestamp);
+    event Revoked(address wlCandidate, uint timestamp);
 
     modifier isUnderHardCap() {
         require(weisRaised <= hardCap);
         _;
     }
 
-    constructor() public  {
-        //addWhiteList();
-        //distributionTokens();
-    }
-
-    function setToken (ERC20 _token) public onlyOwner {
+    constructor(ERC20 _token) public  {
         token = _token;
     }
-    // add address in whitelist
-    function addWhiteList(address _whitelist) public onlyOwner{
 
-        for (uint256 i=0; i<100; i++) {
-            whitelist[_whitelist] = true;
-            membersWhiteList++; // =_whitelist.length;
+    function setVestingAddress(address _newDevPool) public onlyOwner {
+        developers = _newDevPool;
+    }
+
+    function distributionTokens() public onlyOwner {
+        require(!distribute);
+        token.transferFromICO(bounty, bountyReserve*1e18);
+        token.transferFromICO(privateInvestors, privateSaleTokens*1e18);
+        token.transferFromICO(escrow, (developmentReserve+foundersReserve)*1e18);
+        distribute = true;
+    }
+
+    /******************-- WhiteList --***************************/
+    // с сайта backEndOperator авторизует инвестора
+
+    function authorize(address _beneficiary) public onlyOwner  {
+
+        require(_beneficiary != address(0x0));
+        require(!isWhitelisted(_beneficiary));
+        whitelist[_beneficiary] = true;
+        membersWhiteList++;
+        emit Authorized(_beneficiary, now);
+    }
+
+    function addManyAuthorizeToWhitelist(address[] _beneficiaries) public onlyOwner {
+        for (uint256 i = 0; i < _beneficiaries.length; i++) {
+            whitelist[_beneficiaries[i]] = true;
+            membersWhiteList++;
         }
+    }
+
+    // отмена авторизации инвестора в WL(только владелец контракта)
+    function revoke(address _beneficiary) public  onlyOwner {
+        whitelist[_beneficiary] = false;
+        investors--;
+        emit Revoked(_beneficiary, now);
+    }
+
+    function isWhitelisted(address who) public view returns(bool) {
+        return whitelist[who];
     }
 
     function finalize() onlyOwner public {
@@ -170,30 +196,9 @@ contract WhalesburgCrowdsale is Ownable {
         require(now > endICO || weisRaised > hardCap);
         emit Finalized();
         isFinalized = true;
-        //burn(avaliableSupply);
-        //balanceOf[this] = 0;
     }
 
-    function distributionTokens() internal {
-        require(!distribute);
-        token.transferFromICO(bounty, bountyReserve*1e18);
-        token.transferFromICO(privateInvestors, privateSaleTokens*1e18);
-        token.transferFromICO(escrow, (developmentReserve+foundersReserve)*1e18);
-        //avaliableSupply -= 80200000*DEC;
-        distribute = true;
-    }
-
-    function sell(address _investor, uint256 amount) internal {
-        uint256 _amount = amount.mul(1e18).div(buyPrice);
-        //require(amount > avaliableSupply);
-        //avaliableSupply -= _amount;
-        token.transferFromICO(_investor, _amount);
-        if (!onChain[msg.sender]) {
-            tokenHolders.push(msg.sender);
-            onChain[msg.sender] = true;
-        }
-        investors = tokenHolders.length;
-    }
+    /***************************--Payable --*********************************************/
 
     function () isUnderHardCap public payable {
         if(isWhitelisted(msg.sender)) { // verifacation that the sender is a member of WL
@@ -208,10 +213,6 @@ contract WhalesburgCrowdsale is Ownable {
         } else {
             revert();
         }
-    }
-
-    function isWhitelisted(address who) public view returns(bool) {
-        return whitelist[who];
     }
 
     function currentSaleLimit() internal {
@@ -236,27 +237,20 @@ contract WhalesburgCrowdsale is Ownable {
             revert();
         }
     }
-    /*
-    function tokenTransferFromHolding(address _to, uint256 sum) public  {
-        require(now > endICO);
-        require(msg.sender == developers || msg.sender == owner || msg.sender == founders);
-        if (msg.sender == developers || msg.sender == owner) { // !!!нет параметров распределения
-            frozenDevelopers[developers] = frozenDevelopers[developers].add(sum);
-            require(frozenDevelopers[developers] <= developmentReserve);
-            //_transfer(escrow, _to, sum*DEC);
+
+
+    function sell(address _investor, uint256 amount) internal {
+        uint256 _amount = amount.mul(1e18).div(buyPrice);
+        token.transferFromICO(_investor, _amount);
+        if (!onChain[msg.sender]) {
+            tokenHolders.push(msg.sender);
+            onChain[msg.sender] = true;
         }
-        else if (msg.sender == founders  && now > 1553990400) {
-            frozenFounders[founders] = frozenFounders[founders].add(sum);
-            require(frozenFounders[founders] <= foundersReserve);
-            //_transfer(escrow, _to, sum*DEC);
-        }
-        else {
-            revert();
-        }
+        investors = tokenHolders.length;
     }
-    */
+
     // функции сеттеры на период тестирования
-    function testSetStaerDate(uint256 newStart) public onlyOwner {
+    function testSetStartDate(uint256 newStart) public onlyOwner {
         startICO = newStart;
     }
 
