@@ -1,4 +1,3 @@
-// 0xC032D3fCA001b73e8cC3be0B75772329395caA49, 1526461102, 600, 1200, true
 pragma solidity ^0.4.23;
 
 import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol";
@@ -6,12 +5,6 @@ import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/token/ER
 import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-/**
- * @title TokenVesting
- * @dev A token holder contract that can release its token balance gradually like a
- * typical vesting scheme, with a cliff and vesting period. Optionally revocable by the
- * owner.
- */
 contract TokenVesting is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for ERC20Basic;
@@ -61,10 +54,7 @@ contract TokenVesting is Ownable {
         tokensAmount = _tokensAmount;
     }
 
-    /**
-     * @notice Transfers vested tokens to beneficiary.
-     * @param token ERC20 token which is being vested
-     */
+    /* @notice отправка vested tokens бенефициару*/
     function release(ERC20Basic token) public {
         uint256 unreleased = releasableAmount(token);
 
@@ -80,7 +70,6 @@ contract TokenVesting is Ownable {
     /**
      * @notice Allows the owner to revoke the vesting. Tokens already vested
      * remain in the contract, the rest are returned to the owner.
-     * @param token ERC20 token which is being vested
      */
     function revoke(ERC20Basic token) public onlyOwner {
         require(revocable);
@@ -98,22 +87,15 @@ contract TokenVesting is Ownable {
         emit Revoked();
     }
 
-    /**
-     * @dev Calculates the amount that has already vested but hasn't been released yet.
-     * @param token ERC20 token which is being vested
-     */
+    /* @dev Вычисляет сумму, которая уже vested но еще не высобожден.*/
     function releasableAmount(ERC20Basic token) public view returns (uint256) {
         return vestedAmount(token).sub(released[token]);
     }
 
-    /**
-     * @dev Calculates the amount that has already vested.
-     * @param token ERC20 token which is being vested
-     */
+    /* @dev Вычисляет сумму, которая уже vested.*/
     function vestedAmount(ERC20Basic token) public view returns (uint256) {
         uint256 currentBalance = token.balanceOf(this);
         uint256 totalBalance = currentBalance.add(released[token]);
-
         if (block.timestamp < cliff) {
             return 0;
         } else if (block.timestamp >= start.add(duration) || revoked[token]) {
@@ -123,3 +105,4 @@ contract TokenVesting is Ownable {
         }
     }
 }
+// 0xC032D3fCA001b73e8cC3be0B75772329395caA49, 1526461102, 600, 1200, true
