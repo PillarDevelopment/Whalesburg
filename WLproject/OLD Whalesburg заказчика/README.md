@@ -1,1 +1,0 @@
-# token-sale-smart-contract
