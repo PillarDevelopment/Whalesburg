@@ -1,15 +1,3 @@
-/*
-- сделать паблик меппинг чтобы каждый по своему адресу увидел свой лимит - или доступный лимит
-(+)     проданные токены на пресейл
-(+)     function maxDayLimit (для ежедневного капа максимальной покупки) - 20 часов
-(+)     WhiteList - инвестор из данного списка участвует в ICO() - 10 часов
-(+)      проверка на наличие н=инвестора в WhiteList  в payable
-(+)     - tokenTransferFromHolding - для отправки токенов со счета escrow
-(+)     - сжигание нераспределеннх токенов -
-(+)     - finalize - complete
-(+)     - харкап в 3800 eth complete
-*/
-
 pragma solidity ^0.4.23;
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
@@ -70,22 +58,17 @@ contract WhalesburgCrowdsale is Ownable {
     ERC20 public token;
 
     address public multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
-    address  escrow = 0x7eDE8260e573d3A3dDfc058f19309DF5a1f7397E; // address for freezing support's tokens 3
     address  bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
     address  privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
     address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
-    //address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
+    address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
 
     uint256 public startICO = now; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
-
     uint256 public endICO = startICO + 604800;//2813100; // + 7 days
 
     uint256  privateSaleTokens = 46200000;     // tokens for participants preICO
-
     uint256  foundersReserve = 10000000; // frozen tokens for Founders
-
     uint256  developmentReserve = 20500000; // address for vestingContracts
-
     uint256  bountyReserve = 3500000; // tokes for bounty program
 
     uint256 public individualRoundCap; // от номера  // variable for
@@ -130,7 +113,8 @@ contract WhalesburgCrowdsale is Ownable {
         require(!distribute);
         token.transferFromICO(bounty, bountyReserve*1e18);
         token.transferFromICO(privateInvestors, privateSaleTokens*1e18);
-        token.transferFromICO(escrow, (developmentReserve+foundersReserve)*1e18);
+        token.transferFromICO(developers, developmentReserve*1e18);
+        token.transferFromICO(founders, foundersReserve*1e18);
         distribute = true;
     }
 
@@ -215,7 +199,6 @@ contract WhalesburgCrowdsale is Ownable {
             revert();
         }
     }
-
 
     function sell(address _investor, uint256 amount) internal {
         uint256 _amount = amount.mul(1e18).div(buyPrice);
