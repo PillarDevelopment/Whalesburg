@@ -23,16 +23,7 @@ contract TokenVesting is Ownable {
 
     mapping (address => uint256) public released;
     mapping (address => bool) public revoked;
-
-    /**
-     * @dev Creates a vesting contract that vests its balance of any ERC20 token to the
-     * _beneficiary, gradually in a linear fashion until _start + _duration. By then all
-     * of the balance will have vested.
-     * @param _beneficiary address of the beneficiary to whom vested tokens are transferred
-     * @param _cliff duration in seconds of the cliff in which tokens will begin to vest
-     * @param _duration duration in seconds of the period in which the tokens will vest
-     * @param _revocable whether the vesting is revocable or not
-     */
+    
     constructor(
         address _beneficiary,
         uint256 _start,
@@ -45,7 +36,6 @@ contract TokenVesting is Ownable {
     {
         require(_beneficiary != address(0));
         require(_cliff <= _duration);
-
         beneficiary = _beneficiary;
         revocable = _revocable;
         duration = _duration;
