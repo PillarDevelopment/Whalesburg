@@ -4,7 +4,9 @@ About Whalesburg
 
 [Verified Token Contract](https://rinkeby.etherscan.io/address/0xd6e66dcb0ecf9bac791b0398bb1d91500ca1ad14)
 
+
 Публичные поля:
+
 `name` - название токена
 
 `symbol` - краткое название токена (3-4 символа)
@@ -54,9 +56,59 @@ About Whalesburg
 
 [Verified CrowdSale Contract](https://rinkeby.etherscan.io/address/0x81ada0d4f0ddf3a12a7ee11e6e87849fa16df478)
 
+Публичные поля
+
+`multisig` - адрес для хранения эфира
+
+`startICO` - дата начала сейла
+
+`endICO` - дата окончания сейла
+
+`individualRoundCap` - индивидуальный уровень покупки
+
+`hardCap` - верхний порог сбора средств
+
+`investors` - количество инвесторов
+
+`membersWhiteList` - количество авторизованных участников
+
+`buyPrice` - цена покупки токена
+
+`weisRaised` - количество собранного эфира
+
+
+Публичные методы
+
+`setVestingAddress` - установка адреса VestingCreator
+
+`distributionTokens` - распределение токенов вне сейла
+
+`authorize` - авторизация адреса инвестора
+
+`addManyAuthorizeToWhitelist` - аторизация нескольких (до 100) адресов инвесторов
+
+`revoke` - удаление авторизации адреса
+
+`isWhitelisted` - проверка находится ли адрес в WL
+
+`finalize` - завершение сейла
+
 
 [Verified Vesting Constructor Contract](https://rinkeby.etherscan.io/address/0x7256a621e74ad732f2282c810247e9b7c48ef796)
 
+Публичные поля:
+
+`vestingToken` - адрес распределяемого токена
+
+`devPool` - общее количество токенов на пуле для распределения
+
+`revocable` - можно ли отменить распределение токенов
+
+Публичные методы:
+
+`createVesting` - создание вестинга по условиям
+
+`tokenBalance` - баланс токенов на контракте
 
 
 # Инструкция по размещению токена и контракта сейла в сети Ethereum(на примере тестовой сети Rinkeby)
