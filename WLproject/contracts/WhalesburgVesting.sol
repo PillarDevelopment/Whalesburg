@@ -23,7 +23,7 @@ contract TokenVesting is Ownable {
 
     mapping (address => uint256) public released;
     mapping (address => bool) public revoked;
-    
+
     constructor(
         address _beneficiary,
         uint256 _start,
