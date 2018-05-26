@@ -1,6 +1,4 @@
-# Portfolio_SK
-
-About Whalesburg
+#  About Whalesburg
 
 [Verified Token Contract](https://rinkeby.etherscan.io/address/0xd6e66dcb0ecf9bac791b0398bb1d91500ca1ad14)
 
@@ -54,9 +52,13 @@ About Whalesburg
 `setSaleAddress` - устанавливает адрес Sale для токена
 
 
+
+
 [Verified CrowdSale Contract](https://rinkeby.etherscan.io/address/0x81ada0d4f0ddf3a12a7ee11e6e87849fa16df478)
 
+
 Публичные поля
+
 
 `multisig` - адрес для хранения эфира
 
@@ -77,7 +79,9 @@ About Whalesburg
 `weisRaised` - количество собранного эфира
 
 
+
 Публичные методы
+
 
 `setVestingAddress` - установка адреса VestingCreator
 
@@ -94,9 +98,12 @@ About Whalesburg
 `finalize` - завершение сейла
 
 
+
 [Verified Vesting Constructor Contract](https://rinkeby.etherscan.io/address/0x7256a621e74ad732f2282c810247e9b7c48ef796)
 
+
 Публичные поля:
+
 
 `vestingToken` - адрес распределяемого токена
 
