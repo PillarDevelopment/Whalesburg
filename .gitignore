@@ -1,15 +1,7 @@
-/func_bonus.sol
 *.DS_Store
 *.xlsx
 *.gitmodules
-/.Movies_smart
-/.talantico_smart
-/.AMT_token
-/.Тестовое задание
-/WLproject/OLD Whalesburg заказчика/
-/WLproject/OLD Whalesburg заказчика/.babelrc
 /WLproject/OLDVer/
-/WLproject/contracts/OLD_Full_ver1.sol
 *.json
 *.js
 *.txt
