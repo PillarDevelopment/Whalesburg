@@ -8,7 +8,9 @@
 /.Тестовое задание
 /WLproject/OLD Whalesburg заказчика/
 /WLproject/OLD Whalesburg заказчика/.babelrc
-
 /WLproject/OLDVer/
 /WLproject/contracts/OLD_Full_ver1.sol
 *.json
+*.js
+*.txt
+*.doc
