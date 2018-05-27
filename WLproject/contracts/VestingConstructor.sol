@@ -1,9 +1,6 @@
 pragma solidity ^0.4.23;
-
-pragma solidity ^0.4.23;
 /**
  * @title ERC20Basic
- * @dev Simpler version of ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/179 */
 contract ERC20Basic {
     function totalSupply() public view returns (uint256);
@@ -109,7 +106,6 @@ library SafeMath {
  * @title TokenVesting
  * @dev A token holder contract that can release its token balance gradually like a
  * typical vesting scheme, with a cliff and vesting period. Optionally revocable by the owner.*/
-
 contract TokenVesting is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for ERC20Basic;
@@ -204,7 +200,7 @@ contract VestingCreator is Ownable {
     ERC public token;
     TokenVesting public vestingToken;
 
-    uint256 public devPool; // 21,500,000 WBT
+    uint256 public devPool;
     bool revocable;
 
     event CreateVesting(address spender, uint256 tokensAmount, address contractAddress);
@@ -215,10 +211,8 @@ contract VestingCreator is Ownable {
 
     function tokenBalance() public returns (uint256 balance) {
         return token.balanceOf(this);
-        //return devPool;
     }
 
-    // 0x81cfe8efdb6c7b7218ddd5f6bda3aa4cd1554fd2, 1526842519, 43200, 86400, true
     function createVesting(
         uint256 tokensForVesting,
         address _beneficiary,
