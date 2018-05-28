@@ -198,7 +198,7 @@ contract WhalesburgToken is StandardToken, BurnableToken, Pausable {
         totalSupply_ = totalSupply_.add(initialSupply);
         balances[owner] = balances[owner].add(initialSupply);
         availableSupply = totalSupply_;
-        emit Transfer(address(0x0), this, initialSupply);
+        emit Transfer(address(0x0), owner, initialSupply);
     }
 
     function setSaleAddress(address _saleaddress) public onlyOwner{
