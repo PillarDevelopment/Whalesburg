@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 library SafeMath {
 
@@ -206,7 +206,6 @@ contract WhalesburgToken is StandardToken, BurnableToken, Pausable {
     }
 
     function transferFromICO(address _to, uint256 _value) public onlyICO returns(bool) {
-        require(_to != address(0x0));
         return super.transfer(_to, _value);
     }
 
