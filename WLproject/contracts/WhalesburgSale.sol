@@ -1,4 +1,5 @@
 pragma solidity ^0.4.24;
+
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
 */
@@ -49,6 +50,7 @@ contract Ownable {
         _;
     }
 }
+
 /*********************************************************************************************************************
 * @dev see https://github.com/ethereum/EIPs/issues/20 */
 /*************************************************************************************************************/
@@ -93,8 +95,8 @@ contract WhalesburgCrowdsale is Ownable {
     address[] tokenHolders;
 
     event Finalized();
-    event Authorized(address wlCandidate, uint timestamp);
-    event Revoked(address wlCandidate, uint timestamp);
+    event Authorized(address wlCandidate, uint256 timestamp);
+    event Revoked(address wlCandidate, uint256 timestamp);
 
     modifier isUnderHardCap() {
         require(weisRaised <= hardCap);
@@ -121,13 +123,13 @@ contract WhalesburgCrowdsale is Ownable {
 
     /******************-- WhiteList --***************************/
     function authorize(address _beneficiary) public onlyOwner  {
-
         require(_beneficiary != address(0x0));
         require(!isWhitelisted(_beneficiary));
         whitelist[_beneficiary] = true;
         membersWhiteList++;
         emit Authorized(_beneficiary, now);
     }
+
     /**
     * @dev Example: ["0x253579153746cD2D09C89e73810E369ac6F16115", "0x2Ab1dF22ef514ab94518862082E653457A5c1aFc", "0x33648E28d3745218b78108016B9a138ab1e6dA2C", "0xD4B65C7759460aaDB4CE4735db8037976CB115bb",
     "0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2", "0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3", "0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F",
@@ -175,10 +177,7 @@ contract WhalesburgCrowdsale is Ownable {
         }
     }
 
-
-
     function currentSaleLimit() private {
-
         if(now >= startICO && now <  startICO.add(7200)) {
 
             individualRoundCap = 500000000000000000; //0,5 ETH
