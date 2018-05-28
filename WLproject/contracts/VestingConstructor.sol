@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 /**
  * @title ERC20Basic
  * @dev see https://github.com/ethereum/EIPs/issues/179 */
@@ -201,7 +201,7 @@ contract VestingCreator is Ownable {
     TokenVesting public vestingToken;
 
     uint256 public devPool;
-    bool revocable;
+    bool public revocable;
 
     event CreateVesting(address spender, uint256 tokensAmount, address contractAddress);
 
@@ -222,6 +222,7 @@ contract VestingCreator is Ownable {
         bool _revocable
     ) public onlyOwner {
         devPool = token.balanceOf(this);
+        require(_beneficiary != 0x0);
         require(tokensForVesting <= devPool);
         revocable = _revocable;
         vestingToken = new TokenVesting(_beneficiary, _start, _cliff, _duration, _revocable);
