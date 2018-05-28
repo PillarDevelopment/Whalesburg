@@ -1,4 +1,5 @@
 pragma solidity ^0.4.24;
+
 /**
  * @title ERC20Basic
  * @dev see https://github.com/ethereum/EIPs/issues/179 */
@@ -8,6 +9,7 @@ contract ERC20Basic {
     function transfer(address to, uint256 value) public returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
 }
+
 /**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20 */
@@ -25,6 +27,7 @@ contract ERC20 is ERC20Basic {
         uint256 value
     );
 }
+
 /**
  * @title SafeERC20
  * @dev Wrappers around ERC20 operations that throw on failure. */
@@ -46,6 +49,7 @@ library SafeERC20 {
         require(token.approve(spender, value));
     }
 }
+
 /**
  * @title Ownable
  * @dev The Ownable contract has an owner address, and provides basic authorization control */
@@ -72,6 +76,7 @@ contract Ownable {
         owner = newOwner;
     }
 }
+
 /**
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error */
@@ -102,6 +107,7 @@ library SafeMath {
         return c;
     }
 }
+
 /**
  * @title TokenVesting
  * @dev A token holder contract that can release its token balance gradually like a
@@ -189,7 +195,6 @@ contract TokenVesting is Ownable {
 
 interface ERC {
     function transfer (address _beneficiary, uint256 _tokenAmount) external returns (bool);
-    function transferFromICO(address _to, uint256 _value) external returns(bool);
     function balanceOf(address who) external returns (uint256);
 }
 
