@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
 */
@@ -57,36 +57,36 @@ contract WhalesburgCrowdsale is Ownable {
 
     ERC20 public token;
 
-    address public multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // address for ethereum 2
-    address  bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; // адрес для баунти токенов 4
-    address  privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // счет для средст инветосров PreICO 5
-    address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e; // 6
-    address  founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // 7
+    address public constant multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1;
+    address constant bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6;
+    address constant privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4;
+    address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e;
+    address constant founders = 0x253579153746cD2D09C89e73810E369ac6F16115;
 
-    uint256 public startICO = now; // 1522458000  /03/31/2018 @ 1:00am (UTC) (GMT+1)
-    uint256 public endICO = startICO + 604800;//2813100; // + 7 days
+    uint256 public startICO = now;
+    uint256 public endICO = startICO + 604800;
 
-    uint256  privateSaleTokens = 46200000;     // tokens for participants preICO
-    uint256  foundersReserve = 10000000; // frozen tokens for Founders
-    uint256  developmentReserve = 20500000; // address for vestingContracts
-    uint256  bountyReserve = 3500000; // tokes for bounty program
+    uint256 constant privateSaleTokens = 46200000;
+    uint256 constant foundersReserve = 10000000;
+    uint256 constant developmentReserve = 20500000;
+    uint256 constant bountyReserve = 3500000;
 
-    uint256 public individualRoundCap; // от номера  // variable for
+    uint256 public individualRoundCap;
 
-    uint256 public hardCap = 1421640000000000000000; // 1421.64 ether
+    uint256 public constant hardCap = 1421640000000000000000; // 1421.64 ether
 
-    uint256 public investors; // количество инвесторов проекта
+    uint256 public investors;
 
     uint256 public membersWhiteList;
 
-    uint256 public buyPrice = 10000000000000000000;
+    uint256 public constant buyPrice = 10000000000000000000;
 
     bool public isFinalized = false;
-    bool  distribute = false;
+    bool public distribute = false;
 
     uint256 public weisRaised;
 
-    mapping (address => bool) onChain; // для количества инвесторов
+    mapping (address => bool) public onChain;
     mapping (address => bool) whitelist;
     mapping (address => uint256) public moneySpent;
 
@@ -101,7 +101,8 @@ contract WhalesburgCrowdsale is Ownable {
         _;
     }
 
-    constructor(ERC20 _token) public  {
+    constructor(ERC20 _token) public {
+        require(_token != address(0));
         token = _token;
     }
 
@@ -119,8 +120,6 @@ contract WhalesburgCrowdsale is Ownable {
     }
 
     /******************-- WhiteList --***************************/
-    // с сайта backEndOperator авторизует инвестора
-
     function authorize(address _beneficiary) public onlyOwner  {
 
         require(_beneficiary != address(0x0));
@@ -136,15 +135,14 @@ contract WhalesburgCrowdsale is Ownable {
     **/
     function addManyAuthorizeToWhitelist(address[] _beneficiaries) public onlyOwner {
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
+            require(whitelist[_beneficiaries[i]] != true);
             whitelist[_beneficiaries[i]] = true;
             membersWhiteList++;
         }
     }
 
-    // отмена авторизации инвестора в WL(только владелец контракта)
     function revoke(address _beneficiary) public  onlyOwner {
         whitelist[_beneficiary] = false;
-        investors--;
         emit Revoked(_beneficiary, now);
     }
 
@@ -163,12 +161,12 @@ contract WhalesburgCrowdsale is Ownable {
     /***************************--Payable --*********************************************/
 
     function () isUnderHardCap public payable {
-        if(isWhitelisted(msg.sender)) { // verifacation that the sender is a member of WL
-            require(now > startICO && now < endICO); // chech ICO's date
+        if(isWhitelisted(msg.sender)) {
+            require(now > startICO && now < endICO);
             currentSaleLimit();
             moneySpent[msg.sender] = moneySpent[msg.sender].add(msg.value);
             require(moneySpent[msg.sender] <= individualRoundCap);
-            assert(msg.value >= 1 ether / 20000);
+            require(msg.value >= 1 ether / 20000);
             sell(msg.sender, msg.value);
             weisRaised = weisRaised.add(msg.value);
             multisig.transfer(msg.value);
@@ -177,30 +175,32 @@ contract WhalesburgCrowdsale is Ownable {
         }
     }
 
-    function currentSaleLimit() internal {
 
-        if(now > startICO && now <  startICO + 7200 ) { //первые 2 часа с начала
+
+    function currentSaleLimit() private {
+
+        if(now >= startICO && now <  startICO.add(7200)) {
 
             individualRoundCap = 500000000000000000; //0,5 ETH
         }
-        else if(now >= startICO + 7200 && now < startICO + 14400) { //следующие 2 часа
+        else if(now >= startICO.add(7200) && now < startICO.add(14400)) {
 
             individualRoundCap = 2000000000000000000; // 2 ETH
         }
-        else if(now >= startICO + 14400 && now < startICO + 86400) { // следующие 20 часов
+        else if(now >= startICO.add(14400) && now < startICO.add(86400)) {
 
             individualRoundCap = 10000000000000000000; // 10 ETH
         }
-        else if(now >= startICO + 86400 && now < endICO) { // следующие 6 дней
+        else if(now >= startICO.add(86400) && now < endICO) {
 
-            individualRoundCap = hardCap; //1400 ETH
+            individualRoundCap = hardCap; //1421.64 ETH
         }
         else {
             revert();
         }
     }
 
-    function sell(address _investor, uint256 amount) internal {
+    function sell(address _investor, uint256 amount) private {
         uint256 _amount = amount.mul(1e18).div(buyPrice);
         token.transferFromICO(_investor, _amount);
         if (!onChain[msg.sender]) {
@@ -208,14 +208,5 @@ contract WhalesburgCrowdsale is Ownable {
             onChain[msg.sender] = true;
         }
         investors = tokenHolders.length;
-    }
-
-    // функции сеттеры на период тестирования
-    function testSetStartDate(uint256 newStart) public onlyOwner {
-        startICO = newStart;
-    }
-
-    function testSetEndDate(uint256 newEnd) public onlyOwner {
-        endICO = newEnd;
     }
 }
