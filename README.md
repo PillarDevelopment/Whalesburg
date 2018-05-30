@@ -3,7 +3,7 @@
 using:
 
 Truffle v4.1.8 (core: 4.1.8)
-Solidity v0.4.23 (solc-js)
+Solidity v0.4.24 (solc-js)
 
 [Verified Token Contract](https://rinkeby.etherscan.io/address/0xd6e66dcb0ecf9bac791b0398bb1d91500ca1ad14)
 
