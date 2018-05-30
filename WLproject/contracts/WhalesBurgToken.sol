@@ -182,7 +182,7 @@ contract WhalesburgToken is StandardToken, BurnableToken, Pausable {
     using SafeMath for uint256;
 
     string  public name = "WhalesburgToken";
-    string  public symbol = "WSR";
+    string  public symbol = "WBT";
     uint256 constant public decimals = 18;
     uint256 constant dec = 10**decimals;
     uint256 public initialSupply = 100000000*dec;
