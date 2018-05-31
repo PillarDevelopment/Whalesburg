@@ -2,8 +2,10 @@
 
 using:
 
-Truffle v4.1.8 (core: 4.1.8)
+Truffle v4.1.11 (core: 4.1.11)
+
 Solidity v0.4.24 (solc-js)
+
 Solium version 1.1.7
 
 [Verified Token Contract]()
