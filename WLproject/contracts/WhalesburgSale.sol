@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 /*
 * @author Ivan Borisov (2622610@gmail.com) (Github.com/pillardevelopment)
@@ -34,7 +34,7 @@ library SafeMath {
 interface ERC20 {
     function transfer (address _beneficiary, uint256 _tokenAmount) external returns (bool);
     function transferFromICO(address _to, uint256 _value) external returns(bool);
-    function balanceOf(address who) external returns (uint256);
+    function balanceOf(address who) external view returns (uint256);
 }
 
 contract Ownable {
@@ -131,9 +131,7 @@ contract WhalesburgCrowdsale is Ownable {
 
     function addManyAuthorizeToWhitelist(address[] _beneficiaries) public onlyOwner {
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
-            require(whitelist[_beneficiaries[i]] != true);
-            whitelist[_beneficiaries[i]] = true;
-            membersWhiteList++;
+            authorize(_beneficiaries[i]);
         }
     }
 
@@ -171,7 +169,7 @@ contract WhalesburgCrowdsale is Ownable {
     }
 
     function currentSaleLimit() private {
-        if(now >= startICO && now < startICO+7200) {
+        if(now >= startICO && now <  startICO.add(7200)) {
 
             individualRoundCap = 500000000000000000; //0,5 ETH
         }
