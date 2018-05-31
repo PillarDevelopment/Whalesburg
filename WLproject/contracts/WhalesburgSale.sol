@@ -54,7 +54,7 @@ contract Ownable {
 * @dev see https://github.com/ethereum/EIPs/issues/20 */
 /*************************************************************************************************************/
 contract WhalesburgCrowdsale is Ownable {
-    using SafeMath for uint;
+    using SafeMath for uint256;
 
     ERC20 public token;
 
@@ -148,7 +148,7 @@ contract WhalesburgCrowdsale is Ownable {
 
     function finalize() onlyOwner public {
         require(!isFinalized);
-        require(now > endICO || weisRaised > hardCap);
+        require(now >= endICO || weisRaised > hardCap);
         emit Finalized();
         isFinalized = true;
         token.transferFromICO(owner, token.balanceOf(this));
@@ -158,7 +158,7 @@ contract WhalesburgCrowdsale is Ownable {
 
     function () isUnderHardCap public payable {
         if(isWhitelisted(msg.sender)) {
-            require(now > startICO && now < endICO);
+            require(now >= startICO && now < endICO);
             currentSaleLimit();
             moneySpent[msg.sender] = moneySpent[msg.sender].add(msg.value);
             require(moneySpent[msg.sender] <= individualRoundCap);
@@ -171,19 +171,19 @@ contract WhalesburgCrowdsale is Ownable {
     }
 
     function currentSaleLimit() private {
-        if(now >= startICO && now <  startICO.add(7200)) {
+        if(now >= startICO && now < startICO+7200) {
 
             individualRoundCap = 500000000000000000; //0,5 ETH
         }
-        else if(now >= startICO.add(7200) && now < startICO.add(14400)) {
+        else if(now >= startICO+7200 && now < startICO+14400) {
 
             individualRoundCap = 2000000000000000000; // 2 ETH
         }
-        else if(now >= startICO.add(14400) && now < startICO.add(86400)) {
+        else if(now >= startICO+14400 && now < startICO+86400) {
 
             individualRoundCap = 10000000000000000000; // 10 ETH
         }
-        else if(now >= startICO.add(86400) && now < endICO) {
+        else if(now >= startICO+86400 && now < endICO) {
 
             individualRoundCap = hardCap; //1421.64 ETH
         }
