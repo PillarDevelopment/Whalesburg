@@ -191,7 +191,7 @@ contract TokenVesting is Ownable {
 
 interface ERC {
     function transfer (address _beneficiary, uint256 _tokenAmount) external returns (bool);
-    function balanceOf(address who) external returns (uint256);
+    function balanceOf(address who) external view returns (uint256);
 }
 
 contract VestingCreator is Ownable {
