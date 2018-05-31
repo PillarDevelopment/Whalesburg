@@ -4,8 +4,9 @@ using:
 
 Truffle v4.1.8 (core: 4.1.8)
 Solidity v0.4.24 (solc-js)
+Solium version 1.1.7
 
-[Verified Token Contract](https://rinkeby.etherscan.io/address/0xd6e66dcb0ecf9bac791b0398bb1d91500ca1ad14)
+[Verified Token Contract]()
 
 
 Публичные поля:
@@ -59,7 +60,7 @@ Solidity v0.4.24 (solc-js)
 
 
 
-[Verified CrowdSale Contract](https://rinkeby.etherscan.io/address/0x81ada0d4f0ddf3a12a7ee11e6e87849fa16df478)
+[Verified CrowdSale Contract]()
 
 
 Публичные поля
@@ -104,7 +105,7 @@ Solidity v0.4.24 (solc-js)
 
 
 
-[Verified Vesting Constructor Contract](https://rinkeby.etherscan.io/address/0x7256a621e74ad732f2282c810247e9b7c48ef796)
+[Verified Vesting Constructor Contract]()
 
 
 Публичные поля:
