@@ -169,7 +169,7 @@ contract WhalesburgCrowdsale is Ownable {
     }
 
     function currentSaleLimit() private {
-        if(now >= startICO && now <  startICO.add(7200)) {
+        if(now >= startICO && now < startICO+7200) {
 
             individualRoundCap = 500000000000000000; //0,5 ETH
         }
