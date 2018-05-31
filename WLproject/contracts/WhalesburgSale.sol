@@ -34,7 +34,6 @@ library SafeMath {
 interface ERC20 {
     function transfer (address _beneficiary, uint256 _tokenAmount) external returns (bool);
     function transferFromICO(address _to, uint256 _value) external returns(bool);
-    function burn(address _who, uint256 _value) external returns(bool);
     function balanceOf(address who) external returns (uint256);
 }
 
@@ -59,16 +58,16 @@ contract WhalesburgCrowdsale is Ownable {
 
     ERC20 public token;
 
-    address public constant multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1;
-    address constant bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6;
-    address constant privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4;
-    address  developers = 0x7c64258824cf4058AACe9490823974bdEA5f366e;
-    address constant founders = 0x253579153746cD2D09C89e73810E369ac6F16115;
+    address public constant multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // for test Only
+    address constant bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; //
+    address constant privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // for test Only
+    address developers = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // for test Only
+    address constant founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // for test Only
 
-    uint256 public startICO = now;
-    uint256 public endICO = startICO + 604800;
+    uint256 public startICO = 1528041600; // Sunday, 03-Jun-18 16:00:00 UTC
+    uint256 public endICO = 1530633600;  // Tuesday, 03-Jul-18 16:00:00 UTC
 
-    uint256 constant privateSaleTokens = 46200000;
+    uint256 constant privateSaleTokens = 46200000; // ждет уточнения
     uint256 constant foundersReserve = 10000000;
     uint256 constant developmentReserve = 20500000;
     uint256 constant bountyReserve = 3500000;
@@ -81,7 +80,7 @@ contract WhalesburgCrowdsale is Ownable {
 
     uint256 public membersWhiteList;
 
-    uint256 public constant buyPrice = 10000000000000000000;
+    uint256 public constant buyPrice = 71800000000000; // 0.0000718 Ether
 
     bool public isFinalized = false;
     bool public distribute = false;
@@ -130,11 +129,6 @@ contract WhalesburgCrowdsale is Ownable {
         emit Authorized(_beneficiary, now);
     }
 
-    /**
-    * @dev Example: ["0x253579153746cD2D09C89e73810E369ac6F16115", "0x2Ab1dF22ef514ab94518862082E653457A5c1aFc", "0x33648E28d3745218b78108016B9a138ab1e6dA2C", "0xD4B65C7759460aaDB4CE4735db8037976CB115bb",
-    "0x7d5874aDD89B0755510730dDedb5f3Ce6929d8B2", "0x0B529De38cF76901451E540A6fEE68Dd1bc2b4B3", "0xB820e7Fc5Df201EDe64Af765f51fBC4BAD17eb1F",
-    "0xC032D3fCA001b73e8cC3be0B75772329395caA49"]
-    **/
     function addManyAuthorizeToWhitelist(address[] _beneficiaries) public onlyOwner {
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
             require(whitelist[_beneficiaries[i]] != true);
@@ -157,7 +151,7 @@ contract WhalesburgCrowdsale is Ownable {
         require(now > endICO || weisRaised > hardCap);
         emit Finalized();
         isFinalized = true;
-        token.burn(this, token.balanceOf(this));
+        token.transferFromICO(owner, token.balanceOf(this));
     }
 
     /***************************--Payable --*********************************************/
@@ -168,7 +162,6 @@ contract WhalesburgCrowdsale is Ownable {
             currentSaleLimit();
             moneySpent[msg.sender] = moneySpent[msg.sender].add(msg.value);
             require(moneySpent[msg.sender] <= individualRoundCap);
-            require(msg.value >= 1 ether / 20000);
             sell(msg.sender, msg.value);
             weisRaised = weisRaised.add(msg.value);
             multisig.transfer(msg.value);
