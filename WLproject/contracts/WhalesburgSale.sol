@@ -66,15 +66,15 @@ contract WhalesburgCrowdsale is Ownable {
 	
 	uint256 public startICO = 1528041600; // Sunday, 03-Jun-18 16:00:00 UTC
 	uint256 public endICO = 1530633600;  // Tuesday, 03-Jul-18 16:00:00 UTC
-	
-	uint256 constant privateSaleTokens = 46200000; // ждет уточнения
+
+	uint256 constant privateSaleTokens = 46988858;
 	uint256 constant foundersReserve = 10000000;
 	uint256 constant developmentReserve = 20500000;
 	uint256 constant bountyReserve = 3500000;
-	
+
 	uint256 public individualRoundCap;
 	
-	uint256 public constant hardCap = 1421640000000000000000; // 1421.64 ether
+	uint256 public constant hardCap = 1365000000000000000000; // 1365 ether
 	
 	uint256 public investors;
 	
@@ -175,7 +175,7 @@ contract WhalesburgCrowdsale is Ownable {
 		}
 		else if(now >= startICO+14400 && now < endICO) {
 			
-			individualRoundCap = hardCap; //1421.64 ETH
+			individualRoundCap = hardCap; // 1365 ether
 		}
 		else {
 			revert();
