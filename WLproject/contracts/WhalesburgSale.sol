@@ -141,7 +141,7 @@ contract WhalesburgCrowdsale is Ownable {
 	
 	function finalize() onlyOwner public {
 		require(!isFinalized);
-		require(now >= endICO || weisRaised > hardCap);
+		require(now >= endICO || weisRaised >= hardCap);
 		emit Finalized();
 		isFinalized = true;
 		token.transferFromICO(owner, token.balanceOf(this));
