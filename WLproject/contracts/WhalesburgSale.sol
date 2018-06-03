@@ -58,27 +58,25 @@ contract WhalesburgCrowdsale is Ownable {
 	
 	ERC20 public token;
 	
-	address public constant multisig = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // for test Only
-	address constant bounty = 0x7B97BF2df716932aaED4DfF09806D97b70C165d6; //
-	address constant privateInvestors = 0xADc50Ae48B4D97a140eC0f037e85e7a0B13453C4; // for test Only
-	address developers = 0xCe66E79f59eafACaf4CaBaA317CaB4857487E3a1; // for test Only
-	address constant founders = 0x253579153746cD2D09C89e73810E369ac6F16115; // for test Only
+	address public constant multisig = 0x5dc5c66eb90dd8c4be285164ca9ea442faa1c2e8;
+	address constant bounty = 0x96abf0420cffe408ba6bb16699f6748bef01b02b;
+	address constant privateInvestors = 0x44eedeecc2a6f5f763a18e8876576b29a856d03a;
+	address developers = 0x8e23cd7ce780e55ace7309b398336443b408c9d4;
+	address constant founders = 0xd7dadf6149FF75f76f36423CAD1E24c81847E85d;
 	
 	uint256 public startICO = 1528041600; // Sunday, 03-Jun-18 16:00:00 UTC
 	uint256 public endICO = 1530633600;  // Tuesday, 03-Jul-18 16:00:00 UTC
-
-	uint256 constant privateSaleTokens = 46988858;
+	
+	uint256 constant privateSaleTokens = 46988857;
 	uint256 constant foundersReserve = 10000000;
 	uint256 constant developmentReserve = 20500000;
 	uint256 constant bountyReserve = 3500000;
-
-	uint256 public individualRoundCap;
 	
-	uint256 public constant hardCap = 1365000000000000000000; // 1365 ether
+	uint256 public individualRoundCap = 1250000000000000000;
+	
+	uint256 public constant hardCap = 1365000067400000000000; // 1365.0000674 ether
 	
 	uint256 public investors;
-	
-	uint256 public membersWhiteList;
 	
 	uint256 public constant buyPrice = 71800000000000; // 0.0000718 Ether
 	
@@ -120,7 +118,6 @@ contract WhalesburgCrowdsale is Ownable {
 		require(_beneficiary != address(0x0));
 		require(!isWhitelisted(_beneficiary));
 		whitelist[_beneficiary] = true;
-		membersWhiteList++;
 		emit Authorized(_beneficiary, now);
 	}
 	
@@ -171,7 +168,7 @@ contract WhalesburgCrowdsale is Ownable {
 		}
 		else if(now >= startICO+7200 && now < startICO+14400) {
 			
-			individualRoundCap = 3500000000000000000; // 3.5 ETH
+			individualRoundCap = 3750000000000000000; // 3.75 ETH
 		}
 		else if(now >= startICO+14400 && now < endICO) {
 			
