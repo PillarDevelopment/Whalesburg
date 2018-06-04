@@ -1,10 +1,2 @@
-*.DS_Store
-*.xlsx
-*.gitmodules
-/WLproject/OLDVer/
-*.json
-*.js
-*.txt
-*.doc
-/аудит/
-/WLproject/contracts/WhalesburgVesting.sol
+/OLDver/
+/audit/
