@@ -8,7 +8,7 @@ Solidity v0.4.24 (solc-js)
 
 Solium version 1.1.7
 
-[Verified Token Contract]()
+[Verified Token Contract](https://etherscan.io/address/0xe2ee1ac57b2e5564522b2de064a47b3f98b0e9c9)
 
 
 Публичные поля:
@@ -62,7 +62,7 @@ Solium version 1.1.7
 
 
 
-[Verified CrowdSale Contract]()
+[Verified CrowdSale Contract](https://etherscan.io/address/0x8B8242Ca04E571B3D03C85be81867cB9300306A6)
 
 
 Публичные поля
@@ -160,3 +160,7 @@ Solium version 1.1.7
 `14` вызвать функцию pause контракта WhalesburgToken.sol и заморозить все операции с токенами;
 
 `15` После завершения Sale в случае наличия нераспроданных токенов вызвать функцию unpause контракта WhalwsburgToken, после этого вызвать функцию finalize контракта WhalesburgCrowdsale, и как только токены поступять обратно на адрес owner контракта, вызвать функцию burn на адресе owner;
+
+Multisig Contract [Verified Vesting Constructor Contract](https://etherscan.io/address/0x5dc5c66eb90dd8c4be285164ca9ea442faa1c2e8)
+
+
